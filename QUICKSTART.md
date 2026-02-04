@@ -21,8 +21,8 @@ If the installer didn't automatically update your settings, add this to `~/.clau
 ```json
 {
   "statusLine": {
-    "type": "custom",
-    "script": "~/.claude-code-statusline/statusline.py"
+    "type": "command",
+    "command": "~/.claude-code-statusline/statusline.py"
   }
 }
 ```

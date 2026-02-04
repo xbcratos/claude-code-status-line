@@ -83,6 +83,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Installation script with helpful prompts
 - Troubleshooting section
 
+## [1.0.1] - 2026-02-04
+
+### Fixed
+- Changed statusLine configuration from `"type": "custom", "script"` to `"type": "command", "command"` to match Claude Code requirements
+- Install script now automatically modifies existing `.claude/settings.json` instead of only creating new files
+- Install script now properly creates default configuration using `config_manager.ensure_config_exists()`
+- Updated all documentation (README.md, QUICKSTART.md) to reflect correct settings format
+
+### Changed
+- Default display mode is now "compact" (icons only) for better space efficiency
+- Improved install script with better error handling and user feedback
+
 ## [Unreleased]
 
 ### Possible Future Enhancements

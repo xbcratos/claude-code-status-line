@@ -46,47 +46,80 @@ else
     echo "  sudo ln -sf $INSTALL_DIR/configure.py $SYMLINK_DIR/claude-statusline-config"
 fi
 
-# Create default config if it doesn't exist
-if [ ! -f "$INSTALL_DIR/config.json" ]; then
-    echo "Creating default configuration..."
-    python3 "$INSTALL_DIR/statusline.py" <<< '{}' > /dev/null 2>&1 || true
-fi
+# Create default config
+echo "Creating default configuration..."
+python3 -c "
+import sys
+sys.path.insert(0, '$INSTALL_DIR')
+from config_manager import ensure_config_exists
+ensure_config_exists()
+" 2>/dev/null || {
+    echo "Warning: Could not create default config automatically"
+    echo "It will be created on first run"
+}
 
 # Update Claude Code settings
 echo
 echo "Updating Claude Code settings..."
 
-if [ ! -f "$CLAUDE_SETTINGS" ]; then
-    echo "Creating new settings file..."
-    mkdir -p "$(dirname "$CLAUDE_SETTINGS")"
-    cat > "$CLAUDE_SETTINGS" << 'EOF'
-{
-  "statusLine": {
-    "type": "custom",
-    "script": "~/.claude-code-statusline/statusline.py"
-  }
+python3 << 'PYTHON_SCRIPT'
+import json
+import os
+from pathlib import Path
+
+settings_file = Path.home() / ".claude" / "settings.json"
+settings_dir = settings_file.parent
+
+# Create .claude directory if it doesn't exist
+settings_dir.mkdir(parents=True, exist_ok=True)
+
+# Load existing settings or create new ones
+if settings_file.exists():
+    try:
+        with open(settings_file, 'r') as f:
+            settings = json.load(f)
+        print(f"✓ Loaded existing settings from {settings_file}")
+    except json.JSONDecodeError:
+        settings = {}
+        print(f"Warning: Could not parse {settings_file}, creating new settings")
+else:
+    settings = {}
+    print(f"✓ Creating new settings file at {settings_file}")
+
+# Update statusLine configuration
+settings["statusLine"] = {
+    "type": "command",
+    "command": "~/.claude-code-statusline/statusline.py"
 }
-EOF
+
+# Save settings
+with open(settings_file, 'w') as f:
+    json.dump(settings, f, indent=2)
+
+print(f"✓ Updated statusLine configuration in {settings_file}")
+PYTHON_SCRIPT
+
+if [ $? -eq 0 ]; then
+    echo
+    echo "Installation complete!"
+    echo
+    echo "Next steps:"
+    echo "1. Run 'claude-statusline-config' to customize your statusline (or python3 $INSTALL_DIR/configure.py)"
+    echo "2. Restart Claude Code to see your new statusline"
+    echo
+    echo "Installation directory: $INSTALL_DIR"
 else
-    echo "Settings file exists. Please manually add the following to $CLAUDE_SETTINGS:"
+    echo
+    echo "Error: Failed to update settings file"
+    echo "Please manually add the following to $CLAUDE_SETTINGS:"
     echo
     cat << 'EOF'
 {
   "statusLine": {
-    "type": "custom",
-    "script": "~/.claude-code-statusline/statusline.py"
+    "type": "command",
+    "command": "~/.claude-code-statusline/statusline.py"
   }
 }
 EOF
     echo
 fi
-
-echo
-echo "Installation complete!"
-echo
-echo "Next steps:"
-echo "1. If you haven't already, add the statusLine configuration to $CLAUDE_SETTINGS"
-echo "2. Run 'claude-statusline-config' to customize your statusline (or python3 $INSTALL_DIR/configure.py)"
-echo "3. Restart Claude Code to see your new statusline"
-echo
-echo "Installation directory: $INSTALL_DIR"

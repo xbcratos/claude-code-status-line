@@ -43,8 +43,8 @@ chmod +x install.sh
 ```json
 {
   "statusLine": {
-    "type": "custom",
-    "script": "~/.claude-code-statusline/statusline.py"
+    "type": "command",
+    "command": "~/.claude-code-statusline/statusline.py"
   }
 }
 ```
