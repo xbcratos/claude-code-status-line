@@ -13,8 +13,10 @@ from config_manager import (
     ensure_config_exists,
     load_config,
     save_config,
+    validate_config,
     CONFIG_FILE
 )
+import constants
 
 
 class TestGetDefaultConfig:
@@ -231,3 +233,71 @@ class TestSaveConfig:
 
         assert test_config_dir.exists()
         assert test_config_file.exists()
+
+
+class TestValidateConfig:
+    """Tests for validate_config function."""
+
+    def test_invalid_display_mode(self):
+        """Test validates and fixes invalid display_mode."""
+        config = {"display_mode": "invalid_mode"}
+        result = validate_config(config)
+        assert result["display_mode"] == constants.DEFAULT_DISPLAY_MODE
+
+    def test_invalid_progress_bar_width_too_small(self):
+        """Test validates progress_bar_width minimum."""
+        config = {"progress_bar_width": 2}  # Below minimum of 5
+        result = validate_config(config)
+        assert result["progress_bar_width"] == constants.DEFAULT_PROGRESS_BAR_WIDTH
+
+    def test_invalid_progress_bar_width_too_large(self):
+        """Test validates progress_bar_width maximum."""
+        config = {"progress_bar_width": 100}  # Above maximum of 50
+        result = validate_config(config)
+        assert result["progress_bar_width"] == constants.DEFAULT_PROGRESS_BAR_WIDTH
+
+    def test_invalid_progress_bar_width_not_int(self):
+        """Test validates progress_bar_width type."""
+        config = {"progress_bar_width": "10"}  # String instead of int
+        result = validate_config(config)
+        assert result["progress_bar_width"] == constants.DEFAULT_PROGRESS_BAR_WIDTH
+
+    def test_invalid_color(self):
+        """Test validates and fixes invalid colors."""
+        config = {
+            "colors": {
+                "model": "invalid_color",
+                "cost": "blue"  # Valid color
+            }
+        }
+        result = validate_config(config)
+        # Should be replaced with default color for "model" which is COLOR_BLUE
+        assert result["colors"]["model"] == constants.COLOR_BLUE
+        assert result["colors"]["cost"] == "blue"
+
+    def test_invalid_field_names_in_order(self):
+        """Test validates and removes invalid field names."""
+        config = {
+            "field_order": [
+                "model",
+                "invalid_field",
+                "cost",
+                "another_invalid"
+            ]
+        }
+        result = validate_config(config)
+        # Invalid fields should be removed
+        assert "invalid_field" not in result["field_order"]
+        assert "another_invalid" not in result["field_order"]
+        # Valid fields should remain
+        assert "model" in result["field_order"]
+        assert "cost" in result["field_order"]
+        # All valid field names should be present
+        for field in constants.VALID_FIELD_NAMES:
+            assert field in result["field_order"]
+
+    def test_valid_config_unchanged(self):
+        """Test that valid config passes through unchanged."""
+        config = get_default_config()
+        result = validate_config(config)
+        assert result == config

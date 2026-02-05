@@ -6,12 +6,37 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent))
 
 import json
+import logging
 import os
 from typing import Dict, Any
 from config_manager import load_config
 from display_formatter import format_compact, format_verbose
 from git_utils import get_git_branch
+from exceptions import InvalidJSONError
 import colors
+
+# Configure logger
+logger = logging.getLogger("claude_statusline")
+
+
+def _configure_logging() -> None:
+    """
+    Configure logging based on environment variables.
+
+    LOG_LEVEL environment variable can be set to control verbosity:
+    - DEBUG: Detailed information for debugging
+    - INFO: Confirmation that things are working
+    - WARNING: Something unexpected happened (default)
+    - ERROR: Serious problem
+
+    Logs go to stderr to avoid interfering with stdout output.
+    """
+    log_level = os.environ.get("LOG_LEVEL", "WARNING").upper()
+    logging.basicConfig(
+        level=getattr(logging, log_level, logging.WARNING),
+        format="%(levelname)s: %(message)s",
+        stream=sys.stderr
+    )
 
 # Require Python 3.6+
 if sys.version_info < (3, 6):
@@ -95,28 +120,43 @@ def extract_data(json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str,
 
 def main() -> None:
     """Main entry point for statusline script."""
+    # Configure logging first
+    _configure_logging()
+
     try:
         # Read JSON from stdin
+        logger.debug("Reading JSON from stdin")
         input_data = sys.stdin.read()
-        json_data = json.loads(input_data)
+
+        try:
+            json_data = json.loads(input_data)
+            logger.debug(f"Successfully parsed JSON with keys: {list(json_data.keys())}")
+        except json.JSONDecodeError as e:
+            raise InvalidJSONError(f"Failed to parse JSON input: {e}")
 
         # Load user config
+        logger.debug("Loading configuration")
         config = load_config()
 
         # Set color state in colors module based on config and environment
         # Note: We modify the module state rather than environment to avoid side effects
         if not config.get("enable_colors", True):
+            logger.debug("Colors disabled by config")
             colors._color_override = False
         elif not colors.is_color_enabled():
+            logger.debug("Colors disabled by NO_COLOR environment variable")
             colors._color_override = False
         else:
             colors._color_override = None
 
         # Extract data from JSON
+        logger.debug("Extracting data from JSON")
         data = extract_data(json_data, config)
+        logger.debug(f"Extracted fields: {list(data.keys())}")
 
         # Format output based on display mode
         display_mode = config.get("display_mode", "compact")
+        logger.debug(f"Using display mode: {display_mode}")
 
         if display_mode in ["large", "verbose"]:  # Support both names for compatibility
             output = format_verbose(data, config)
@@ -125,12 +165,13 @@ def main() -> None:
 
         # Output to stdout
         print(output)
+        logger.debug("Statusline output complete")
 
-    except json.JSONDecodeError:
-        print("Error: Invalid JSON input", file=sys.stderr)
+    except InvalidJSONError as e:
+        logger.error(f"Invalid JSON: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"Error: {e}", file=sys.stderr)
+        logger.error(f"Unexpected error: {e}", exc_info=True)
         sys.exit(1)
 
 if __name__ == "__main__":

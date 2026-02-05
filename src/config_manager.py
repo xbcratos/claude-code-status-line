@@ -6,11 +6,16 @@ Uses constants module for all default values and validation.
 """
 
 import json
+import logging
 import sys
 from pathlib import Path
 from typing import Dict, Any, List
 
 import constants
+from exceptions import ConfigurationError
+
+# Configure logger
+logger = logging.getLogger("claude_statusline.config")
 
 CONFIG_DIR = Path.home() / ".claude-code-statusline"
 CONFIG_FILE = CONFIG_DIR / "config.json"
@@ -85,11 +90,11 @@ def validate_config(config: Dict[str, Any]) -> Dict[str, Any]:
                 if field not in config["field_order"]:
                     config["field_order"].append(field)
 
-    # Print warnings if any
+    # Log warnings if any
     if warnings:
-        print("Configuration validation warnings:", file=sys.stderr)
+        logger.warning("Configuration validation warnings:")
         for warning in warnings:
-            print(f"  - {warning}", file=sys.stderr)
+            logger.warning(f"  - {warning}")
 
     return config
 
@@ -130,12 +135,12 @@ def load_config() -> Dict[str, Any]:
 
         return config
     except json.JSONDecodeError as e:
-        print(f"Warning: Config file contains invalid JSON: {e}", file=sys.stderr)
-        print(f"Using default configuration instead.", file=sys.stderr)
+        logger.warning(f"Config file contains invalid JSON: {e}")
+        logger.warning("Using default configuration instead")
         return get_default_config()
     except IOError as e:
-        print(f"Warning: Could not read config file: {e}", file=sys.stderr)
-        print(f"Using default configuration instead.", file=sys.stderr)
+        logger.warning(f"Could not read config file: {e}")
+        logger.warning("Using default configuration instead")
         return get_default_config()
 
 

@@ -11,15 +11,140 @@ from colors import colorize
 import constants
 from fields import create_field_registry, Field
 from models import StatusLineData, Configuration
+from exceptions import FieldNotFoundError
 
 
-# Create field registry (singleton pattern)
-_field_registry: Dict[str, Field] = create_field_registry()
+class StatusLineFormatter:
+    """
+    Formats statusline output using Field classes.
+
+    This class encapsulates the field registry and formatting logic,
+    providing a clean OOP interface for statusline generation.
+    """
+
+    def __init__(self):
+        """Initialize formatter with field registry."""
+        self._field_registry: Dict[str, Field] = create_field_registry()
+
+    def get_field(self, field_name: str) -> Field:
+        """
+        Get a field instance by name.
+
+        Args:
+            field_name: Name of the field
+
+        Returns:
+            Field instance
+
+        Raises:
+            FieldNotFoundError: If field not found
+        """
+        if field_name not in self._field_registry:
+            raise FieldNotFoundError(field_name)
+        return self._field_registry[field_name]
+
+    def format(
+        self,
+        data: Dict[str, Any],
+        config: Dict[str, Any],
+        verbose: bool = False
+    ) -> str:
+        """
+        Format the statusline output.
+
+        Args:
+            data: Extracted data dictionary
+            config: Configuration dictionary
+            verbose: Whether to use verbose formatting
+
+        Returns:
+            Formatted statusline string
+        """
+        # Wrap dictionaries in typed models
+        status_data = StatusLineData(data)
+        configuration = Configuration(config)
+
+        separator = colorize("  ", configuration.get_color("separator"))
+
+        # Group fields by line
+        line1_fields: List[str] = []  # Identity
+        line2_fields: List[str] = []  # Status
+        line3_fields: List[str] = []  # Metrics
+
+        # Process fields in user's configured order
+        for field_name in configuration.field_order:
+            # Skip if field not visible
+            if not configuration.is_field_visible(field_name):
+                continue
+
+            # Skip if field not in registry
+            if field_name not in self._field_registry:
+                continue
+
+            # Get field instance and format it
+            field = self.get_field(field_name)
+            formatted = field.format(data, config, verbose=verbose)
+
+            if not formatted:
+                continue
+
+            # Add to appropriate line based on field's line assignment
+            if field.line == constants.LINE_IDENTITY:
+                line1_fields.append(formatted)
+            elif field.line == constants.LINE_STATUS:
+                line2_fields.append(formatted)
+            else:  # LINE_METRICS
+                line3_fields.append(formatted)
+
+        # Build output lines
+        lines = []
+        if line1_fields:
+            lines.append(separator.join(line1_fields))
+        if line2_fields:
+            lines.append(separator.join(line2_fields))
+        if line3_fields:
+            lines.append(separator.join(line3_fields))
+
+        return "\n".join(lines)
+
+    def format_compact(self, data: Dict[str, Any], config: Dict[str, Any]) -> str:
+        """
+        Generate compact format statusline.
+
+        Args:
+            data: Extracted data dictionary
+            config: Configuration dictionary
+
+        Returns:
+            Formatted statusline in compact mode
+        """
+        return self.format(data, config, verbose=False)
+
+    def format_verbose(self, data: Dict[str, Any], config: Dict[str, Any]) -> str:
+        """
+        Generate verbose format statusline with labeled fields.
+
+        Args:
+            data: Extracted data dictionary
+            config: Configuration dictionary
+
+        Returns:
+            Formatted statusline in verbose mode
+        """
+        return self.format(data, config, verbose=True)
+
+
+# ============================================================================
+# Module-level convenience functions (create default formatter instance)
+# ============================================================================
+
+# Create default formatter instance
+_default_formatter = StatusLineFormatter()
 
 
 def get_field(field_name: str) -> Field:
     """
-    Get a field instance by name.
+    Get a field instance by name from default formatter.
 
     Args:
         field_name: Name of the field
@@ -28,9 +153,9 @@ def get_field(field_name: str) -> Field:
         Field instance
 
     Raises:
-        KeyError: If field not found
+        FieldNotFoundError: If field not found
     """
-    return _field_registry[field_name]
+    return _default_formatter.get_field(field_name)
 
 
 def format_statusline(
@@ -39,7 +164,7 @@ def format_statusline(
     verbose: bool = False
 ) -> str:
     """
-    Format the statusline output.
+    Format the statusline output using default formatter.
 
     Args:
         data: Extracted data dictionary
@@ -49,57 +174,12 @@ def format_statusline(
     Returns:
         Formatted statusline string
     """
-    # Wrap dictionaries in typed models
-    status_data = StatusLineData(data)
-    configuration = Configuration(config)
-
-    separator = colorize("  ", configuration.get_color("separator"))
-
-    # Group fields by line
-    line1_fields: List[str] = []  # Identity
-    line2_fields: List[str] = []  # Status
-    line3_fields: List[str] = []  # Metrics
-
-    # Process fields in user's configured order
-    for field_name in configuration.field_order:
-        # Skip if field not visible
-        if not configuration.is_field_visible(field_name):
-            continue
-
-        # Skip if field not in registry
-        if field_name not in _field_registry:
-            continue
-
-        # Get field instance and format it
-        field = get_field(field_name)
-        formatted = field.format(data, config, verbose=verbose)
-
-        if not formatted:
-            continue
-
-        # Add to appropriate line based on field's line assignment
-        if field.line == constants.LINE_IDENTITY:
-            line1_fields.append(formatted)
-        elif field.line == constants.LINE_STATUS:
-            line2_fields.append(formatted)
-        else:  # LINE_METRICS
-            line3_fields.append(formatted)
-
-    # Build output lines
-    lines = []
-    if line1_fields:
-        lines.append(separator.join(line1_fields))
-    if line2_fields:
-        lines.append(separator.join(line2_fields))
-    if line3_fields:
-        lines.append(separator.join(line3_fields))
-
-    return "\n".join(lines)
+    return _default_formatter.format(data, config, verbose)
 
 
 def format_compact(data: Dict[str, Any], config: Dict[str, Any]) -> str:
     """
-    Generate compact format statusline.
+    Generate compact format statusline using default formatter.
 
     Args:
         data: Extracted data dictionary
@@ -108,12 +188,12 @@ def format_compact(data: Dict[str, Any], config: Dict[str, Any]) -> str:
     Returns:
         Formatted statusline in compact mode
     """
-    return format_statusline(data, config, verbose=False)
+    return _default_formatter.format_compact(data, config)
 
 
 def format_verbose(data: Dict[str, Any], config: Dict[str, Any]) -> str:
     """
-    Generate verbose format statusline with labeled fields.
+    Generate verbose format statusline with labeled fields using default formatter.
 
     Args:
         data: Extracted data dictionary
@@ -122,11 +202,11 @@ def format_verbose(data: Dict[str, Any], config: Dict[str, Any]) -> str:
     Returns:
         Formatted statusline in verbose mode
     """
-    return format_statusline(data, config, verbose=True)
+    return _default_formatter.format_verbose(data, config)
 
 
 # ============================================================================
-# Legacy Functions (for backward compatibility)
+# Legacy Functions (for backward compatibility with tests)
 # ============================================================================
 
 def format_progress_bar(percentage: int, width: int, config: Dict[str, Any]) -> str:
