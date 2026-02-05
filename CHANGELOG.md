@@ -350,6 +350,36 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated default field order and visibility settings
 - Enhanced `EXTENDING.md` with external data sources example (git branch)
 
+## [1.2.1] - 2026-02-05
+
+### Fixed
+- **Documentation**: Updated README.md example configuration to accurately reflect default settings
+  - **Confirmed memory_usage is enabled by default** (was enabled in v1.2.0, documentation was outdated)
+  - Added missing system monitoring fields to examples: `cpu_usage`, `memory_usage`, `battery`
+  - Added missing Python environment fields: `python_version`, `python_venv`
+  - Added missing `datetime` field
+  - Fixed memory icon in examples (🧮 abacus instead of 🧠 brain)
+  - Fixed CPU icon in examples (💻 computer instead of 🖥️ desktop)
+  - Updated field order to match default configuration
+  - Added missing icons and colors for new fields
+
+### Testing
+- **Added comprehensive test suite for system_utils.py**:
+  - Created 40 new tests covering all system monitoring functions
+  - Tests for Linux, macOS, and Windows implementations
+  - Coverage for CPU, memory, and battery monitoring
+  - Error handling and edge case validation
+  - **system_utils.py coverage: 34% → 94%**
+  - **Overall test coverage: 67% → 77%**
+  - **Total tests: 176 → 216 tests**
+  - All tests passing
+
+### Notes
+- This is a documentation and testing-only release with no functional changes
+- **Memory usage display has been enabled by default since v1.2.0**
+- All v1.2.0 features (system monitoring, Python environment, datetime) are enabled by default
+- Users can disable any field via the configuration tool: `claude-statusline-config`
+
 ## [Unreleased]
 
 ### Possible Future Enhancements

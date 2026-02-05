@@ -88,14 +88,14 @@ The configuration tool provides:
 ```
 📁 my-project  🌿 main ✓  🤖 claude-sonnet-4-5-20250929  📟 v1.0.85  🐍 3.11.5  🕐 2026-02-05 15:30:42
 🧠 Context Remaining: 85% [========--]
-📊 75000 tok (2500 tpm)  💰 $12.50 ($25.00/h)  🖥️ 25%  🧠 8.5GB  🔋 85%
+📊 75000 tok (2500 tpm)  💰 $12.50 ($25.00/h)  💻 25%  🧮 8.5GB  🔋 85%
 ```
 
 **Verbose Mode** - Labeled fields for clarity:
 ```
 📁 Directory: my-project  🌿 Git branch: main ✓  🤖 Model: claude-sonnet-4-5-20250929  📟 Version: v1.0.85  🐍 Python: 3.11.5  🕐 Time: 2026-02-05 15:30:42
 🧠 Context remaining: 85% [========--]  ⌛ Duration: 30m
-📊 Tokens: 75000 tok (2500 tpm)  💰 Cost: $12.50 ($25.00/h)  🖥️ CPU: 25%  🧠 Memory: 8.5GB  🔋 Battery: 85%
+📊 Tokens: 75000 tok (2500 tpm)  💰 Cost: $12.50 ($25.00/h)  💻 CPU: 25%  🧮 Memory: 8.5GB  🔋 Battery: 85%
 ```
 
 ### Available Fields
@@ -159,16 +159,31 @@ Example configuration:
     "cost": true,
     "duration": false,
     "lines_changed": false,
-    "output_style": false
+    "output_style": false,
+    "cpu_usage": true,
+    "memory_usage": true,
+    "battery": true,
+    "python_version": true,
+    "python_venv": true,
+    "datetime": true
   },
   "field_order": [
     "current_dir",
     "git_branch",
     "model",
     "version",
+    "output_style",
+    "python_version",
+    "datetime",
     "context_remaining",
+    "duration",
     "tokens",
-    "cost"
+    "cost",
+    "lines_changed",
+    "cpu_usage",
+    "memory_usage",
+    "battery",
+    "python_venv"
   ],
   "icons": {
     "directory": "📁",
@@ -177,7 +192,13 @@ Example configuration:
     "version": "📟",
     "context": "🧠",
     "cost": "💰",
-    "tokens": "📊"
+    "tokens": "📊",
+    "duration": "⌛",
+    "cpu": "💻",
+    "memory": "🧮",
+    "battery": "🔋",
+    "python": "🐍",
+    "datetime": "🕐"
   },
   "colors": {
     "directory": "cyan",
@@ -185,7 +206,13 @@ Example configuration:
     "model": "blue",
     "version": "magenta",
     "context": "yellow",
-    "cost": "red"
+    "cost": "red",
+    "tokens": "cyan",
+    "cpu": "green",
+    "memory": "cyan",
+    "battery": "yellow",
+    "python": "blue",
+    "datetime": "white"
   },
   "show_progress_bars": true,
   "progress_bar_width": 10,
@@ -205,7 +232,7 @@ echo '{"model":{"display_name":"Sonnet 4"},"version":"v1.0.85","context_window":
 
 ### Automated Testing
 
-The project includes a comprehensive test suite with **154 tests** covering all core functionality.
+The project includes a comprehensive test suite with **216 tests** covering all core functionality.
 
 **Run tests:**
 ```bash
@@ -219,8 +246,8 @@ python3 -m pytest tests/
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-**Test coverage (v1.2.0):**
-- Overall: 67% coverage (1241 statements)
+**Test coverage (v1.2.1):**
+- Overall: 77% coverage (1241 statements)
 - colors.py: 100%
 - git_utils.py: 100%
 - exceptions.py: 100%
@@ -228,10 +255,11 @@ python3 -m pytest tests/ --cov=src --cov-report=term-missing
 - data_extractor.py: 97%
 - display_formatter.py: 97%
 - config_manager.py: 94%
+- system_utils.py: 94%
 - fields.py: 93%
 - statusline.py: 90%
 
-Test breakdown: 176 tests (165 unit tests + 11 integration tests)
+Test breakdown: 216 tests (205 unit tests + 11 integration tests)
 
 ## Troubleshooting
 
