@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch, mock_open
 # Add src directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from git_utils import get_git_branch, get_git_status, _is_git_dirty, _get_ahead_behind
+from git_utils import get_git_branch, get_git_status, _is_git_dirty, _get_ahead_behind, get_pr_status
 
 
 class TestGetGitBranch:
@@ -366,3 +366,172 @@ class TestGetGitStatus:
         with patch('subprocess.run', side_effect=FileNotFoundError):
             result = get_git_status(str(tmp_path))
             assert result == ""
+
+
+class TestGetPRStatus:
+    """Tests for get_pr_status function."""
+
+    def test_approved_pr_shows_green(self, tmp_path):
+        """Test shows green color for approved PR."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 123, "isDraft": false, "reviewDecision": "APPROVED", "statusCheckRollup": []}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#123 with green color code
+            assert "PR#123" in result
+            assert "\033[92m" in result  # Green color code
+
+    def test_draft_pr_shows_yellow(self, tmp_path):
+        """Test shows yellow color for draft PR."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 456, "isDraft": true, "reviewDecision": "", "statusCheckRollup": []}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#456 with yellow color code
+            assert "PR#456" in result
+            assert "\033[93m" in result  # Yellow color code
+
+    def test_changes_requested_shows_red(self, tmp_path):
+        """Test shows red color for PR with changes requested."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 789, "isDraft": false, "reviewDecision": "CHANGES_REQUESTED", "statusCheckRollup": []}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#789 with red color code
+            assert "PR#789" in result
+            assert "\033[91m" in result  # Red color code
+
+    def test_failing_checks_show_red(self, tmp_path):
+        """Test shows red color for PR with failing status checks."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 100, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"status": "FAILURE"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#100 with red color code
+            assert "PR#100" in result
+            assert "\033[91m" in result  # Red color code
+
+    def test_pending_checks_show_yellow(self, tmp_path):
+        """Test shows yellow color for PR with pending status checks."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 200, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"status": "PENDING"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#200 with yellow color code
+            assert "PR#200" in result
+            assert "\033[93m" in result  # Yellow color code
+
+    def test_passing_checks_show_green(self, tmp_path):
+        """Test shows green color for PR with passing status checks."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 300, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"status": "SUCCESS"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#300 with green color code
+            assert "PR#300" in result
+            assert "\033[92m" in result  # Green color code
+
+    def test_no_pr_returns_empty_string(self, tmp_path):
+        """Test returns empty string when no PR exists for branch."""
+        mock_result = Mock()
+        mock_result.returncode = 1
+        mock_result.stdout = ""
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            assert result == ""
+
+    def test_gh_not_installed_returns_empty_string(self, tmp_path):
+        """Test returns empty string when gh CLI is not installed."""
+        with patch('subprocess.run', side_effect=FileNotFoundError):
+            result = get_pr_status(str(tmp_path))
+            assert result == ""
+
+    def test_gh_command_timeout(self, tmp_path):
+        """Test handles gh command timeout gracefully."""
+        with patch('subprocess.run', side_effect=subprocess.TimeoutExpired('gh', 0.5)):
+            result = get_pr_status(str(tmp_path))
+            assert result == ""
+
+    def test_invalid_json_returns_empty_string(self, tmp_path):
+        """Test returns empty string when gh returns invalid JSON."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "invalid json"
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            assert result == ""
+
+    def test_missing_pr_number_returns_empty_string(self, tmp_path):
+        """Test returns empty string when PR number is missing."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"isDraft": false, "reviewDecision": ""}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            assert result == ""
+
+    def test_subprocess_error_returns_empty_string(self, tmp_path):
+        """Test returns empty string on subprocess error."""
+        with patch('subprocess.run', side_effect=subprocess.SubprocessError):
+            result = get_pr_status(str(tmp_path))
+            assert result == ""
+
+    def test_checks_with_conclusion_field(self, tmp_path):
+        """Test handles status checks with 'conclusion' field instead of 'status'."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 400, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"conclusion": "FAILURE"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            # Should contain PR#400 with red color code
+            assert "PR#400" in result
+            assert "\033[91m" in result  # Red color code
+
+    def test_error_status_shows_red(self, tmp_path):
+        """Test shows red color for PR with ERROR status."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 500, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"status": "ERROR"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            assert "PR#500" in result
+            assert "\033[91m" in result  # Red color code
+
+    def test_cancelled_status_shows_red(self, tmp_path):
+        """Test shows red color for PR with CANCELLED status."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 600, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"status": "CANCELLED"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            assert "PR#600" in result
+            assert "\033[91m" in result  # Red color code
+
+    def test_in_progress_status_shows_yellow(self, tmp_path):
+        """Test shows yellow color for PR with IN_PROGRESS status."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = '{"number": 700, "isDraft": false, "reviewDecision": "", "statusCheckRollup": [{"status": "IN_PROGRESS"}]}'
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_pr_status(str(tmp_path))
+            assert "PR#700" in result
+            assert "\033[93m" in result  # Yellow color code

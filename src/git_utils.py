@@ -1,9 +1,11 @@
 import os
 import subprocess
+import json
 from pathlib import Path
 from typing import Optional, Tuple
 
 import constants
+from colors import colorize
 
 
 def get_git_status(cwd: str) -> str:
@@ -163,3 +165,68 @@ def get_git_branch(cwd: str) -> str:
         pass
 
     return ""
+
+
+def get_pr_status(cwd: str) -> str:
+    """
+    Get PR status for the current branch using GitHub CLI.
+
+    Returns a colored PR status string:
+    - Green: PR is approved or all checks pass
+    - Yellow: PR is in draft state
+    - Red: PR has failing checks or changes requested
+
+    Args:
+        cwd: Current working directory path
+
+    Returns:
+        Colored PR status string (e.g., "PR#123") or empty string
+    """
+    try:
+        # Check if gh CLI is available and we're in a GitHub repo
+        result = subprocess.run(
+            ['gh', 'pr', 'view', '--json', 'number,isDraft,reviewDecision,statusCheckRollup'],
+            cwd=cwd,
+            capture_output=True,
+            text=True,
+            timeout=constants.GIT_COMMAND_TIMEOUT_SECONDS
+        )
+
+        if result.returncode != 0:
+            # No PR for this branch or gh not available
+            return ""
+
+        pr_data = json.loads(result.stdout)
+        pr_number = pr_data.get('number')
+        if not pr_number:
+            return ""
+
+        # Determine color based on PR state
+        is_draft = pr_data.get('isDraft', False)
+        review_decision = pr_data.get('reviewDecision', '')
+        status_checks = pr_data.get('statusCheckRollup', [])
+
+        # Determine overall status
+        color = 'green'  # Default to green (optimistic)
+
+        if is_draft:
+            color = 'yellow'
+        elif review_decision == 'CHANGES_REQUESTED':
+            color = 'red'
+        elif status_checks:
+            # Check if any status checks failed
+            for check in status_checks:
+                status = check.get('status') or check.get('conclusion')
+                if status in ['FAILURE', 'ERROR', 'CANCELLED', 'TIMED_OUT']:
+                    color = 'red'
+                    break
+                elif status in ['PENDING', 'IN_PROGRESS']:
+                    color = 'yellow'
+                    break
+
+        pr_text = f"PR#{pr_number}"
+        return colorize(pr_text, color)
+
+    except (subprocess.SubprocessError, FileNotFoundError, json.JSONDecodeError, ValueError):
+        # gh not installed, timeout, or invalid JSON
+        return ""

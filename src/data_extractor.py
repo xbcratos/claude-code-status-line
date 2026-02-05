@@ -9,7 +9,7 @@ import os
 from datetime import datetime
 from typing import Dict, Any
 
-from git_utils import get_git_branch, get_git_status
+from git_utils import get_git_branch, get_git_status, get_pr_status
 from system_utils import get_cpu_usage, get_memory_usage, get_battery_status
 from python_utils import get_python_version, get_python_venv
 
@@ -136,12 +136,19 @@ class DataExtractor:
             # Get git branch for the workspace
             git_branch = get_git_branch(cwd)
             if git_branch:
-                # Get git status and append to branch if available
+                parts = [git_branch]
+
+                # Add git status if available
                 git_status = get_git_status(cwd)
                 if git_status:
-                    data["git_branch"] = f"{git_branch} {git_status}"
-                else:
-                    data["git_branch"] = git_branch
+                    parts.append(git_status)
+
+                # Add PR status if available
+                pr_status = get_pr_status(cwd)
+                if pr_status:
+                    parts.append(pr_status)
+
+                data["git_branch"] = " ".join(parts)
 
         return data
 

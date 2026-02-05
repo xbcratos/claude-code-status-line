@@ -16,7 +16,7 @@ A highly customizable statusline tool for Claude Code that provides fine-grained
 - **Fine-grained Control**: Show/hide individual fields like model, version, context, tokens, cost, git branch, and more
 - **System Monitoring** (v1.2.0+): Real-time CPU usage, memory usage, and battery level display
 - **Python Environment Detection** (v1.2.0+): Display Python version and active virtual environment
-- **Enhanced Git Status** (v1.2.0+): Shows clean/dirty state and commits ahead/behind remote
+- **Enhanced Git Status** (v1.2.0+): Shows clean/dirty state, commits ahead/behind remote, and PR status with color-coded indicators
 - **Date/Time Display** (v1.2.0+): Current timestamp with seconds precision
 - **Custom Colors**: Full ANSI color customization with light/bright variants for better visibility
 - **Custom Icons**: Customize or remove icons for each field
@@ -106,7 +106,7 @@ The configuration tool provides:
 - **Context Remaining**: Percentage of context window remaining (with progress bar)
 - **Tokens**: Total input + output tokens (with tokens per minute)
 - **Current Directory**: Current working directory name
-- **Git Branch**: Current git branch with status indicators (✓ clean, ★ dirty, ↑N ahead, ↓N behind)
+- **Git Branch**: Current git branch with status indicators (✓ clean, ★ dirty, ↑N ahead, ↓N behind) and PR status with color-coded indicators (green for approved/passing checks, yellow for draft/pending checks, red for failing checks/changes requested)
 - **Cost**: Total cost in USD (with cost per hour)
 - **Duration**: Session duration
 - **Lines Changed**: Total lines added + removed
@@ -246,20 +246,20 @@ python3 -m pytest tests/
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-**Test coverage (v1.2.1):**
-- Overall: 77% coverage (1241 statements)
+**Test coverage (v1.2.3):**
+- Overall: 77% coverage (1294 statements)
 - colors.py: 100%
 - git_utils.py: 100%
 - exceptions.py: 100%
 - models.py: 100%
+- system_utils.py: 99%
 - data_extractor.py: 97%
 - display_formatter.py: 97%
 - config_manager.py: 94%
-- system_utils.py: 94%
 - fields.py: 93%
 - statusline.py: 90%
 
-Test breakdown: 216 tests (205 unit tests + 11 integration tests)
+Test breakdown: 232 tests (221 unit tests + 11 integration tests)
 
 ## Troubleshooting
 
@@ -278,6 +278,12 @@ Test breakdown: 216 tests (205 unit tests + 11 integration tests)
 - Ensure you're in a git repository
 - Verify git is installed: `git --version`
 - Check that the git repository is properly initialized
+
+### PR status not showing
+- Ensure GitHub CLI (gh) is installed: `gh --version`
+- Authenticate with GitHub: `gh auth login`
+- Ensure you're on a branch with an associated pull request
+- PR status will appear as "PR#123" in green (approved/passing), yellow (draft/pending), or red (failing/changes requested)
 
 ## Uninstallation
 

@@ -409,3 +409,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Shell completion for configure.py
 - Powerline-style separators
 - Theme presets
+
+## [1.2.3] - 2026-02-05
+
+### Added
+- **Pull Request Status Display**: GitHub PR status now appears in git_branch field
+  - Automatically detects PR for current branch using GitHub CLI (`gh`)
+  - Color-coded status indicators:
+    - **Green**: PR is approved or all checks passing
+    - **Yellow**: PR is in draft state or checks pending
+    - **Red**: PR has failing checks or changes requested
+  - Shows as "PR#123" after git status indicators
+  - Gracefully handles missing `gh` CLI or branches without PRs
+  - Fast execution with 0.5s timeout
+  - Zero impact if gh is not installed
+
+### Testing
+- **Added comprehensive test suite for PR status**:
+  - Created 16 new tests covering `get_pr_status()` function
+  - Tests for all PR states: approved, draft, changes requested, passing/failing/pending checks
+  - Error handling for missing gh CLI, invalid JSON, timeouts
+  - Coverage for both 'status' and 'conclusion' fields in statusCheckRollup
+  - **Total tests: 216 → 232 tests**
+  - All tests passing
+
+### Technical Details
+- Uses `gh pr view --json number,isDraft,reviewDecision,statusCheckRollup`
+- JSON parsing with proper error handling
+- Color codes applied using existing `colorize()` function
+- Integrates seamlessly into existing git_branch field architecture
+- Maintains zero external dependencies (gh CLI is optional)
+
+### Documentation
+- Updated README.md with PR status feature description
+- Added troubleshooting section for PR status
+- Updated feature list to highlight color-coded PR indicators
