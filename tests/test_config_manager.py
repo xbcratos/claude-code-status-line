@@ -60,10 +60,10 @@ class TestGetDefaultConfig:
         config = get_default_config()
         colors = config["colors"]
         assert isinstance(colors, dict)
-        # Check some key colors exist
-        assert "directory" in colors
-        assert "git_branch" in colors
-        assert "progress_bar_filled" in colors
+        # Check some key colors exist (field names + special keys)
+        assert "current_dir" in colors  # Field name for directory color
+        assert "git_branch" in colors   # Field name for git branch color
+        assert "progress_bar_filled" in colors  # Special key
 
 
 class TestEnsureConfigExists:

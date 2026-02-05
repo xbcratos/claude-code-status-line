@@ -4,7 +4,7 @@ The Claude Code Statusline Tool allows you to customize the order in which field
 
 ## How Field Ordering Works
 
-Fields are grouped into semantic lines using constants defined in `display_formatter.py` (v1.0.2+):
+Fields are grouped into semantic lines using constants defined in `constants.py` (v1.0.3+):
 - `LINE_IDENTITY = 1`: Identity information
 - `LINE_STATUS = 2`: Status information
 - `LINE_METRICS = 3`: Metrics and statistics
@@ -126,4 +126,4 @@ Edit `~/.claude-code-statusline/config.json`:
 }
 ```
 
-**Note:** You control the order within each line, but cannot move fields between lines 1, 2, and 3. Line assignments are defined in `display_formatter.py` using the `FIELD_LINE_ASSIGNMENT` dictionary (v1.0.2+).
+**Note:** You control the order within each line, but cannot move fields between lines 1, 2, and 3. Line assignments are defined in `constants.py` using the `FIELD_LINE_ASSIGNMENT` dictionary (v1.0.3+).

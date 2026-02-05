@@ -191,7 +191,7 @@ echo '{"model":{"display_name":"Sonnet 4"},"version":"v1.0.85","context_window":
 
 ### Automated Testing
 
-The project includes a comprehensive test suite with 79+ unit tests covering all core functionality.
+The project includes a comprehensive test suite with 90 tests (79 unit tests + 11 integration tests) covering all core functionality.
 
 **Run tests:**
 ```bash

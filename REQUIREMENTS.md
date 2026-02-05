@@ -81,7 +81,8 @@ python3 -m pytest tests/
 
 - **v1.0.0**: Initial release - zero dependencies
 - **v1.0.1**: Still zero dependencies
-- **v1.0.2**: Added test dependencies in requirements-test.txt, runtime still zero dependencies
+- **v1.0.2**: Added test dependencies in requirements-test.txt, runtime still zero dependencies (79 tests)
+- **v1.0.3**: OOP refactoring with Field classes, runtime still zero dependencies (90 tests)
 
 ## Future Considerations
 

@@ -58,7 +58,7 @@ By default, you'll see:
 ## Quick Customization Tips
 
 ### Change Display Mode
-In the config tool: Option 1 → Choose "large" for more details
+In the config tool: Option 1 → Choose "verbose" for labeled fields
 
 ### Hide Fields You Don't Need
 In the config tool: Option 2 → Toggle off unwanted fields

@@ -48,56 +48,13 @@ fi
 
 # Create default config
 echo "Creating default configuration..."
-python3 -c "
-import sys
-sys.path.insert(0, '$INSTALL_DIR')
-from config_manager import ensure_config_exists
-ensure_config_exists()
-" 2>/dev/null || {
-    echo "Warning: Could not create default config automatically"
-    echo "It will be created on first run"
-}
+python3 "$(dirname "${BASH_SOURCE[0]}")/install_helper.py" create-config "$INSTALL_DIR"
 
 # Update Claude Code settings
 echo
 echo "Updating Claude Code settings..."
 
-python3 << 'PYTHON_SCRIPT'
-import json
-import os
-from pathlib import Path
-
-settings_file = Path.home() / ".claude" / "settings.json"
-settings_dir = settings_file.parent
-
-# Create .claude directory if it doesn't exist
-settings_dir.mkdir(parents=True, exist_ok=True)
-
-# Load existing settings or create new ones
-if settings_file.exists():
-    try:
-        with open(settings_file, 'r') as f:
-            settings = json.load(f)
-        print(f"✓ Loaded existing settings from {settings_file}")
-    except json.JSONDecodeError:
-        settings = {}
-        print(f"Warning: Could not parse {settings_file}, creating new settings")
-else:
-    settings = {}
-    print(f"✓ Creating new settings file at {settings_file}")
-
-# Update statusLine configuration
-settings["statusLine"] = {
-    "type": "command",
-    "command": "~/.claude-code-statusline/statusline.py"
-}
-
-# Save settings
-with open(settings_file, 'w') as f:
-    json.dump(settings, f, indent=2)
-
-print(f"✓ Updated statusLine configuration in {settings_file}")
-PYTHON_SCRIPT
+python3 "$(dirname "${BASH_SOURCE[0]}")/install_helper.py" update-settings "$CLAUDE_SETTINGS"
 
 if [ $? -eq 0 ]; then
     echo
