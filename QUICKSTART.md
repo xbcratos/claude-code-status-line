@@ -109,7 +109,7 @@ Show usage and costs:
 ## Next Steps
 
 - Read [README.md](README.md) for full documentation
-- Check [EXAMPLES.md](EXAMPLES.md) for configuration examples
+- See [EXTENDING.md](EXTENDING.md) for developer guide on adding custom fields
 - Customize your statusline with the config tool
 
 ## Support

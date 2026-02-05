@@ -1,6 +1,6 @@
-# Extending the Statusline Tool (v1.0.3+)
+# Extending the Statusline Tool (v1.1.0+)
 
-This guide explains how to add new fields and features to the Claude Code Statusline Tool using the object-oriented architecture introduced in v1.0.3.
+This guide explains how to add new fields and features to the Claude Code Statusline Tool using the object-oriented architecture (v1.0.3+) and facade pattern (v1.1.0+).
 
 ## Table of Contents
 
@@ -15,14 +15,29 @@ This guide explains how to add new fields and features to the Claude Code Status
 
 ## Architecture Overview
 
-The tool uses an object-oriented architecture (v1.0.3+):
+The tool uses an object-oriented architecture with Facade pattern (v1.1.0+):
 
-- **`src/constants.py`** - All constants, defaults, and validation rules
+- **`src/statusline.py`** - StatusLine facade class that orchestrates all components
+- **`src/config_manager.py`** - ConfigManager class for loading/saving configuration with caching
+- **`src/data_extractor.py`** - DataExtractor class for extracting and transforming JSON data
+- **`src/display_formatter.py`** - StatusLineFormatter class that uses Field classes to format output
 - **`src/fields.py`** - Field class hierarchy (SimpleField, ProgressField, MetricField, DurationField)
 - **`src/models.py`** - Data models (StatusLineData, Configuration)
-- **`src/display_formatter.py`** - Uses Field classes to format output
-- **`src/statusline.py`** - Extracts data from JSON
-- **`src/config_manager.py`** - Loads/saves configuration
+- **`src/constants/`** - Organized package with focused modules:
+  - `constants/fields.py` - Field names, labels, icons, line assignments
+  - `constants/colors.py` - Color definitions and mappings
+  - `constants/config.py` - Configuration keys and defaults
+  - `constants/display.py` - Display modes, icons, time formatting
+
+### Key Architectural Benefits (v1.1.0)
+
+The v1.1.0 architecture provides several benefits for extensibility:
+
+1. **Organized Constants**: Split into focused modules, making it easier to find and modify related constants
+2. **DataExtractor Class**: Extraction logic organized into focused methods following Single Responsibility Principle
+3. **ConfigManager with Caching**: Stateful configuration management reduces file I/O
+4. **StatusLine Facade**: Simplified API for programmatic use without CLI dependencies
+5. **Dependency Injection**: All classes accept optional dependencies for easier testing and customization
 
 ---
 
@@ -30,11 +45,12 @@ The tool uses an object-oriented architecture (v1.0.3+):
 
 ### Step 1: Add Constants
 
-**File:** `src/constants.py`
+**Files:** `src/constants/fields.py`, `src/constants/colors.py`, `src/constants/config.py`
 
-Add your field name constant and update the relevant dictionaries:
+Add your field name constant and update the relevant dictionaries in the appropriate constants modules:
 
 ```python
+# In src/constants/fields.py:
 # Field Names
 FIELD_YOUR_FIELD = "your_field"
 
@@ -50,18 +66,6 @@ FIELD_LINE_ASSIGNMENT: Dict[str, int] = {
     FIELD_YOUR_FIELD: LINE_METRICS,  # or LINE_IDENTITY or LINE_STATUS
 }
 
-# Add default icon
-DEFAULT_ICONS: Dict[str, str] = {
-    # ... existing icons ...
-    "your_field": "🆕",
-}
-
-# Add default color
-DEFAULT_COLORS: Dict[str, str] = {
-    # ... existing colors ...
-    FIELD_YOUR_FIELD: COLOR_CYAN,
-}
-
 # Add label for verbose mode
 FIELD_LABELS: Dict[str, str] = {
     # ... existing labels ...
@@ -74,6 +78,14 @@ FIELD_ICON_KEYS: Dict[str, str] = {
     FIELD_YOUR_FIELD: "your_field",
 }
 
+# In src/constants/colors.py:
+# Add default color
+DEFAULT_COLORS: Dict[str, str] = {
+    # ... existing colors ...
+    FIELD_YOUR_FIELD: COLOR_CYAN,
+}
+
+# In src/constants/config.py:
 # Add to defaults
 DEFAULT_VISIBLE_FIELDS: Dict[str, bool] = {
     # ... existing fields ...
@@ -84,40 +96,58 @@ DEFAULT_FIELD_ORDER: List[str] = [
     # ... existing fields ...
     FIELD_YOUR_FIELD,  # Position determines default order
 ]
+
+# In src/constants/display.py:
+# Add default icon
+DEFAULT_ICONS: Dict[str, str] = {
+    # ... existing icons ...
+    "your_field": "🆕",
+}
 ```
 
 ### Step 2: Extract Data from JSON
 
-**File:** `src/statusline.py`
+**File:** `src/data_extractor.py`
 
-Add extraction logic in the `extract_data()` function:
+Add extraction logic in the `DataExtractor` class. You can either:
+
+**Option A: Add a new extraction method** (recommended for complex fields):
 
 ```python
-def extract_data(json_data, config):
-    """Extract relevant fields from Claude Code JSON input."""
-    data = {}
+class DataExtractor:
+    def extract(self, json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        data = {}
+        # ... existing extraction calls ...
+        data.update(self._extract_your_field(json_data))
+        return data
 
-    # ... existing extraction code ...
+    def _extract_your_field(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract your custom field."""
+        data = {}
+        if "your_field_location" in json_data:
+            # Extract and process the value
+            raw_value = json_data["your_field_location"]["field_name"]
 
-    # Add your new field extraction
-    if "your_field_location" in json_data:
-        # Extract and process the value
-        raw_value = json_data["your_field_location"]["field_name"]
+            # Optional: Transform the value
+            processed_value = self._transform_value(raw_value)
 
-        # Optional: Transform the value
-        processed_value = transform_value(raw_value)
-
-        data["your_field"] = processed_value
-
-    return data
+            data["your_field"] = processed_value
+        return data
 ```
 
-**Example: Adding API call count**
+**Option B: Add to an existing extraction method** (for simple fields):
 
 ```python
-# In extract_data() function
-if "api" in json_data and "total_calls" in json_data["api"]:
-    data["api_calls"] = json_data["api"]["total_calls"]
+# In an appropriate existing method like _extract_cost() or _extract_context()
+def _extract_workspace(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
+    data = {}
+    # ... existing code ...
+
+    # Add your new field extraction
+    if "api" in json_data and "total_calls" in json_data["api"]:
+        data["api_calls"] = json_data["api"]["total_calls"]
+
+    return data
 ```
 
 ### Step 3: Create Field Instance
@@ -195,24 +225,31 @@ def create_field_registry() -> Dict[str, Field]:
 
 ### Example: Adding Response Time Average
 
-**File:** `src/statusline.py`
+**File:** `src/data_extractor.py`
 
 ```python
-def extract_data(json_data, config):
-    data = {}
+class DataExtractor:
+    def _extract_performance(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract performance metrics with calculations."""
+        data = {}
 
-    # ... existing code ...
+        if "performance" in json_data:
+            perf = json_data["performance"]
 
-    # Calculate average response time
-    if "performance" in json_data:
-        perf = json_data["performance"]
-        if "total_response_time_ms" in perf and "total_requests" in perf:
-            total_time = perf["total_response_time_ms"]
-            total_requests = perf["total_requests"]
-            if total_requests > 0:
-                data["avg_response_time"] = total_time / total_requests
+            # Calculate average response time
+            if "total_response_time_ms" in perf and "total_requests" in perf:
+                total_time = perf["total_response_time_ms"]
+                total_requests = perf["total_requests"]
+                if total_requests > 0:
+                    data["avg_response_time"] = total_time / total_requests
 
-    return data
+        return data
+
+    def extract(self, json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        data = {}
+        # ... existing extraction calls ...
+        data.update(self._extract_performance(json_data))
+        return data
 ```
 
 **File:** `src/fields.py`
@@ -237,9 +274,11 @@ class ResponseTimeField(MetricField):
 
 ## Modifying Defaults
 
-All defaults are in `src/constants.py`. Simply edit the constants:
+All defaults are organized in the `src/constants/` package. Edit the appropriate module:
 
 ### Change Default Colors
+
+**File:** `src/constants/colors.py`
 
 ```python
 DEFAULT_COLORS: Dict[str, str] = {
@@ -250,6 +289,8 @@ DEFAULT_COLORS: Dict[str, str] = {
 
 ### Change Default Icons
 
+**File:** `src/constants/display.py`
+
 ```python
 DEFAULT_ICONS: Dict[str, str] = {
     "model": "🔮",  # Changed from 🤖
@@ -258,6 +299,8 @@ DEFAULT_ICONS: Dict[str, str] = {
 ```
 
 ### Change Default Field Order
+
+**File:** `src/constants/config.py`
 
 ```python
 DEFAULT_FIELD_ORDER: List[str] = [
@@ -268,6 +311,8 @@ DEFAULT_FIELD_ORDER: List[str] = [
 ```
 
 ### Change Progress Bar Defaults
+
+**File:** `src/constants/config.py`
 
 ```python
 DEFAULT_PROGRESS_BAR_WIDTH = 15  # Changed from 10
@@ -384,27 +429,50 @@ class AdaptiveField(Field):
 
 Let's add a "memory_used" field showing memory usage:
 
-### 1. Constants (`src/constants.py`)
+### 1. Constants
 
+**File:** `src/constants/fields.py`
 ```python
 FIELD_MEMORY_USED = "memory_used"
 
 VALID_FIELD_NAMES = [..., FIELD_MEMORY_USED]
 FIELD_LINE_ASSIGNMENT = {..., FIELD_MEMORY_USED: LINE_METRICS}
-DEFAULT_ICONS = {..., "memory": "💾"}
-DEFAULT_COLORS = {..., FIELD_MEMORY_USED: COLOR_MAGENTA}
 FIELD_LABELS = {..., FIELD_MEMORY_USED: "Memory:"}
 FIELD_ICON_KEYS = {..., FIELD_MEMORY_USED: "memory"}
+```
+
+**File:** `src/constants/colors.py`
+```python
+DEFAULT_COLORS = {..., FIELD_MEMORY_USED: COLOR_MAGENTA}
+```
+
+**File:** `src/constants/config.py`
+```python
 DEFAULT_VISIBLE_FIELDS = {..., FIELD_MEMORY_USED: False}
 DEFAULT_FIELD_ORDER = [..., FIELD_MEMORY_USED]
 ```
 
-### 2. Extraction (`src/statusline.py`)
+**File:** `src/constants/display.py`
+```python
+DEFAULT_ICONS = {..., "memory": "💾"}
+```
+
+### 2. Extraction (`src/data_extractor.py`)
 
 ```python
-# In extract_data():
-if "system" in json_data and "memory_mb" in json_data["system"]:
-    data["memory_used"] = json_data["system"]["memory_mb"]
+class DataExtractor:
+    def _extract_system_info(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Extract system information like memory usage."""
+        data = {}
+        if "system" in json_data and "memory_mb" in json_data["system"]:
+            data["memory_used"] = json_data["system"]["memory_mb"]
+        return data
+
+    def extract(self, json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
+        data = {}
+        # ... existing extraction calls ...
+        data.update(self._extract_system_info(json_data))
+        return data
 ```
 
 ### 3. Field Class (`src/fields.py`)
@@ -440,6 +508,7 @@ constants.FIELD_MEMORY_USED: MemoryField(
 ## Need Help?
 
 - Check existing fields in `src/fields.py` for examples
-- See `OOP_REFACTORING.md` for architecture details
+- See `PROJECT_STRUCTURE.md` for comprehensive architecture documentation
+- See `CODE_REVIEW.md` for detailed architectural evolution and improvements
 - Review `tests/` for testing patterns
 - Open an issue on GitHub for questions

@@ -134,6 +134,102 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added `pytest.ini` for test configuration
 - All 79 tests passing with strong coverage metrics
 
+## [1.0.3] - 2026-02-05
+
+### Added
+- **OOP Refactoring - Field Classes**: Introduced Field class hierarchy for better organization
+  - Created base `Field` class with common formatting logic
+  - Specialized subclasses: `SimpleField`, `ProgressBarField`, `MetricField`, `RateField`
+  - Each field knows how to format itself (Strategy pattern)
+  - Eliminated code duplication across formatting functions
+- **Comprehensive Integration Tests**: 11 new integration tests covering end-to-end workflows
+- Better code organization with clear separation of concerns
+
+### Changed
+- `display_formatter.py`: Refactored from procedural to OOP design
+- Fields are now registered and formatted through a centralized registry
+- Format functions simplified by delegating to Field classes
+
+### Technical Improvements
+- Applied Strategy and Factory patterns for field formatting
+- Improved maintainability and extensibility
+- Test coverage increased to 90 tests (62% coverage)
+
+## [1.0.4] - 2026-02-05
+
+### Added
+- **StatusLineFormatter Class**: Converted module-level functions to proper OOP class
+  - Encapsulated field registry as instance variable
+  - Added methods: `get_field()`, `format()`, `format_compact()`, `format_verbose()`
+  - Maintained backward compatibility with module-level convenience functions
+- **Custom Exception Hierarchy**: Created specialized exceptions for better error handling
+  - `StatusLineError`: Base exception for all statusline errors
+  - `ConfigurationError`: Invalid configuration issues
+  - `FieldNotFoundError`: Field not found in registry (stores field name)
+  - `InvalidJSONError`: JSON parsing failures
+  - `ValidationError`: Data validation failures
+- **Logging Module**: Replaced print statements with proper logging
+  - Configurable via `LOG_LEVEL` environment variable
+  - Levels: DEBUG, INFO, WARNING (default), ERROR
+  - Debug logging throughout workflow for troubleshooting
+- **Test Coverage Improvements**: Increased from 90 to 154 tests (70% coverage)
+  - Added 54 tests for StatusLineData and Configuration models
+  - Added 7 validation tests for config_manager
+  - Added 10 exception hierarchy tests
+  - Coverage: 96.3% for testable code (excluding interactive CLI)
+
+### Changed
+- All error handling now uses custom exceptions
+- Console output uses logging module (logs to stderr)
+- config_manager warnings use logger instead of print
+
+### Technical Improvements
+- Better testability with OOP classes
+- Proper error hierarchy for specific error handling
+- Professional logging infrastructure
+
+## [1.1.0] - 2026-02-05
+
+### Added
+- **ConfigManager Class**: Stateful configuration management
+  - Caching support with `load(force_reload)` and `reload()` methods
+  - Support for multiple config files via constructor parameter
+  - Instance-based design for better testability
+  - Maintained backward compatibility with module-level functions
+- **DataExtractor Class**: Organized data extraction into focused methods
+  - Extracted 73-line `extract_data()` function into specialized class
+  - Methods: `_extract_model()`, `_extract_version()`, `_extract_context()`, `_extract_workspace()`, `_extract_cost()`, `_extract_output_style()`
+  - Proper handling of cross-field dependencies (e.g., tokens_per_minute calculation)
+  - Clean separation of concerns (Single Responsibility Principle)
+- **StatusLine Facade Class**: Simplified API for statusline generation
+  - Orchestrates ConfigManager, DataExtractor, and StatusLineFormatter
+  - Provides clean `generate(json_input: str) -> str` API
+  - Simplified `main()` from 50 lines to 15 lines
+  - Easy to test without CLI dependencies
+  - Better for programmatic use
+
+### Changed
+- **Constants Module Organization**: Split 247-line `constants.py` into focused modules
+  - `constants/fields.py` (93 lines): Field names, labels, icons, line assignments
+  - `constants/colors.py` (66 lines): Color definitions and default mappings
+  - `constants/config.py` (74 lines): Configuration keys and defaults
+  - `constants/display.py` (95 lines): Display modes, icons, time formatting, git settings
+  - `constants/__init__.py` (174 lines): Re-exports all for backward compatibility
+  - Better organization, easier to navigate and extend
+- ConfigManager default parameter now evaluated at runtime (fixes test monkeypatching)
+
+### Technical Improvements
+- Consistent OOP design across all major modules
+- Facade pattern for simplified high-level API
+- Better dependency injection support
+- Cleaner, more maintainable codebase
+- All 154 tests passing
+
+### Removed
+- TypedDict implementation (initially added then reverted)
+  - Removed due to Python version compatibility complexity
+  - Simple `Dict[str, Any]` type hints are sufficient and clearer
+
 ## [Unreleased]
 
 ### Possible Future Enhancements

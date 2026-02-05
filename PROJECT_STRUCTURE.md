@@ -5,22 +5,31 @@
 ```
 claude-code-statusline/
 ├── src/                          # Source code directory
-│   ├── statusline.py             # Main entry point (reads stdin, outputs formatted line)
-│   ├── config_manager.py         # Configuration file management
+│   ├── statusline.py             # Main entry point with StatusLine facade class (v1.1.0+)
+│   ├── config_manager.py         # ConfigManager class for stateful config management (v1.1.0+)
+│   ├── data_extractor.py         # DataExtractor class for JSON data extraction (v1.1.0+)
 │   ├── configure.py              # Interactive CLI for configuration
-│   ├── display_formatter.py      # Format and render the statusline (uses Field classes)
+│   ├── display_formatter.py      # StatusLineFormatter class for rendering (v1.0.4+)
 │   ├── git_utils.py              # Git branch detection utilities
 │   ├── colors.py                 # ANSI color codes and themes
-│   ├── constants.py              # All constants, defaults, and validation rules (v1.0.3+)
+│   ├── constants/                # Organized constants modules (v1.1.0+)
+│   │   ├── __init__.py           # Re-exports all constants for compatibility
+│   │   ├── fields.py             # Field names, labels, icons, line assignments
+│   │   ├── colors.py             # Color definitions and default mappings
+│   │   ├── config.py             # Configuration keys and defaults
+│   │   └── display.py            # Display modes, icons, time formatting, git settings
 │   ├── fields.py                 # Field class hierarchy (SimpleField, ProgressField, etc.) (v1.0.3+)
-│   └── models.py                 # Data models (StatusLineData, Configuration) (v1.0.3+)
-├── tests/                        # Test suite (90 tests: 79 unit + 11 integration)
+│   ├── models.py                 # Data models (StatusLineData, Configuration) (v1.0.3+)
+│   └── exceptions.py             # Custom exception hierarchy (v1.0.4+)
+├── tests/                        # Test suite (154 tests, 70% coverage)
 │   ├── __init__.py               # Test package initializer
 │   ├── test_colors.py            # Color module tests (10 tests)
-│   ├── test_config_manager.py    # Config tests (13 tests)
-│   ├── test_display_formatter.py # Formatter tests (21 tests)
+│   ├── test_config_manager.py    # ConfigManager tests (20 tests)
+│   ├── test_display_formatter.py # Formatter tests (25 tests)
+│   ├── test_exceptions.py        # Exception hierarchy tests (10 tests) (v1.0.4+)
 │   ├── test_git_utils.py         # Git utility tests (10 tests)
-│   ├── test_statusline.py        # Statusline tests (25 tests)
+│   ├── test_models.py            # Data model tests (54 tests) (v1.0.4+)
+│   ├── test_statusline.py        # Statusline tests (21 tests)
 │   └── test_integration.py       # Integration tests (11 tests)
 ├── install.sh                    # Installation script
 ├── install_helper.py             # Installation helper (called by install.sh)
@@ -28,11 +37,10 @@ claude-code-statusline/
 ├── pytest.ini                    # Pytest configuration
 ├── README.md                     # Main documentation
 ├── QUICKSTART.md                 # Quick start guide
-├── EXTENDING.md                  # Developer guide for extending functionality (OOP architecture)
+├── EXTENDING.md                  # Developer guide for extending functionality
 ├── FIELD_ORDERING.md             # Guide to field ordering
-├── OOP_REFACTORING.md            # OOP architecture documentation (v1.0.3+)
+├── CODE_REVIEW.md                # Comprehensive code review and roadmap
 ├── CHANGELOG.md                  # Version history
-├── IMPROVEMENTS.md               # Code quality improvements log
 ├── LICENSE                       # MIT License
 ├── .gitignore                    # Git ignore rules
 └── PROJECT_STRUCTURE.md          # This file
@@ -40,49 +48,60 @@ claude-code-statusline/
 User Installation:
 ~/.claude-code-statusline/        # Installation directory
 ├── statusline.py                 # Installed main script
-├── config_manager.py             # Installed config manager
+├── config_manager.py             # Installed ConfigManager
+├── data_extractor.py             # Installed DataExtractor
 ├── configure.py                  # Installed config tool
-├── display_formatter.py          # Installed formatter
+├── display_formatter.py          # Installed StatusLineFormatter
 ├── git_utils.py                  # Installed git utils
 ├── colors.py                     # Installed color module
-├── constants.py                  # Installed constants (v1.0.3+)
-├── fields.py                     # Installed field classes (v1.0.3+)
-├── models.py                     # Installed data models (v1.0.3+)
+├── constants/                    # Installed constants package
+│   ├── __init__.py
+│   ├── fields.py
+│   ├── colors.py
+│   ├── config.py
+│   └── display.py
+├── fields.py                     # Installed field classes
+├── models.py                     # Installed data models
+├── exceptions.py                 # Installed exceptions
 └── config.json                   # User configuration
 
 Claude Code Settings:
 ~/.claude/settings.json           # Claude Code configuration
 ```
 
-## Component Dependencies
+## Component Dependencies (v1.1.0 Architecture)
 
 ```
 statusline.py
-├── config_manager.py
-│   └── constants.py
-├── display_formatter.py
-│   ├── colors.py
-│   ├── constants.py
-│   ├── fields.py
-│   │   ├── constants.py
-│   │   └── colors.py
-│   └── models.py
-│       └── constants.py
-└── git_utils.py
-    └── constants.py
+├── StatusLine (facade class)
+│   ├── ConfigManager
+│   │   └── constants/
+│   ├── DataExtractor
+│   │   ├── git_utils
+│   │   │   └── constants/
+│   │   └── constants/
+│   └── StatusLineFormatter
+│       ├── fields
+│       │   ├── constants/
+│       │   └── colors
+│       ├── models
+│       │   └── constants/
+│       └── colors
+├── exceptions
+└── colors
 
 configure.py
-├── config_manager.py
-│   └── constants.py
-├── display_formatter.py
-│   ├── colors.py
-│   ├── constants.py
-│   ├── fields.py
-│   └── models.py
-└── colors.py
+├── config_manager
+│   └── constants/
+├── display_formatter
+│   ├── colors
+│   ├── constants/
+│   ├── fields
+│   └── models
+└── colors
 ```
 
-## Data Flow
+## Data Flow (v1.1.0)
 
 ```
 Claude Code
@@ -90,16 +109,25 @@ Claude Code
     ├─> Sends JSON via stdin
     │
     ▼
-statusline.py
+statusline.py::main()
     │
-    ├─> Reads config.json via config_manager.py (uses constants.py)
-    ├─> Extracts data from JSON
-    ├─> Gets git branch via git_utils.py (uses constants.py)
-    ├─> Formats output via display_formatter.py
-    │   ├─> Uses Field classes (fields.py) for formatting
-    │   ├─> Uses constants.py for defaults and validation
-    │   ├─> Uses models.py for typed data access
-    │   └─> Applies colors via colors.py
+    ├─> Creates StatusLine facade
+    │   │
+    │   ├─> StatusLine.generate(json_input)
+    │       │
+    │       ├─> ConfigManager.load()
+    │       │   └─> Validates using constants/
+    │       │
+    │       ├─> DataExtractor.extract()
+    │       │   ├─> Extracts model, version, context, workspace
+    │       │   ├─> Gets git branch via git_utils
+    │       │   └─> Calculates rates and metrics
+    │       │
+    │       └─> StatusLineFormatter.format()
+    │           ├─> Uses Field classes for formatting
+    │           ├─> Uses models for typed data access
+    │           ├─> Uses constants/ for defaults
+    │           └─> Applies colors via colors module
     │
     └─> Outputs formatted statusline to stdout
     │
@@ -109,150 +137,199 @@ Claude Code displays statusline
 
 ## Module Descriptions
 
-### statusline.py (Main Entry Point)
-- Reads JSON from stdin
-- Loads user configuration
-- Extracts relevant fields
-- Coordinates git detection
-- Formats and outputs statusline
+### statusline.py (Main Entry Point) [v1.1.0]
+Main CLI entry point with StatusLine facade class for orchestration.
+
+**Classes:**
+- `StatusLine`: Facade that coordinates ConfigManager, DataExtractor, and StatusLineFormatter
+  - `generate(json_input: str) -> str`: Main API for generating statusline
 
 **Key Functions:**
-- `main() -> None`: Entry point
-- `extract_data(json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]`: Parse Claude Code JSON
-
-**Type Hints:** Full type annotations using Python 3.6+ typing module
-
-### config_manager.py (Configuration Management)
-- Manages configuration file I/O
-- Provides defaults from constants.py
-- Validates configuration values using constants.py
-- Logs helpful error messages
-
-**Key Functions:**
-- `load_config() -> Dict[str, Any]`: Load user config
-- `save_config(config: Dict[str, Any]) -> None`: Save config to file
-- `get_default_config() -> Dict[str, Any]`: Return default configuration using constants
-- `ensure_config_exists() -> None`: Create config if missing
-- `validate_config(config: Dict[str, Any]) -> Dict[str, Any]`: Validate using constants
-
-**Type Hints:** Full type annotations
-
-**Architecture (v1.0.3+):** Uses constants.py for all defaults and validation rules
-
-### display_formatter.py (Output Formatting)
-- Renders statusline in compact/verbose modes using Field classes
-- Coordinates field formatting through Field class hierarchy
-- Uses constants.py for line grouping and defaults
-- Uses models.py for typed data access
-
-**Key Functions:**
-- `format_statusline(data, config, verbose=False) -> str`: Unified formatter using Field classes
-- `format_compact(data: Dict[str, Any], config: Dict[str, Any]) -> str`: Generate compact output
-- `format_verbose(data: Dict[str, Any], config: Dict[str, Any]) -> str`: Generate verbose output
-- `get_field(field_name: str) -> Field`: Get field instance from registry
-- Legacy functions for backward compatibility: `format_progress_bar`, `format_field`, `format_duration`
+- `main() -> None`: CLI entry point (simplified to 15 lines in v1.1.0)
+- `_configure_logging() -> None`: Set up logging based on LOG_LEVEL env var
 
 **Type Hints:** Full type annotations
 
 **Architecture:**
-- v1.0.2: Eliminated ~80% code duplication
-- v1.0.3: OOP refactoring with Field classes - each field knows how to format itself
+- v1.0.0-1.0.3: Procedural with extract_data() function
+- v1.1.0: Facade pattern - StatusLine class orchestrates all components
+
+### config_manager.py (Configuration Management) [v1.1.0]
+Stateful configuration management with caching and validation.
+
+**Classes:**
+- `ConfigManager`: Manages configuration loading, validation, and persistence
+  - `__init__(config_file: Path = None)`: Initialize with optional custom config file
+  - `load(force_reload: bool = False) -> Dict[str, Any]`: Load config with caching
+  - `save(config: Dict[str, Any]) -> None`: Validate and save config
+  - `reload() -> Dict[str, Any]`: Force reload from file
+  - `validate(config: Dict[str, Any]) -> Dict[str, Any]`: Validate configuration
+  - `ensure_exists() -> None`: Create default config if missing
+
+**Module-level Functions (backward compatibility):**
+- `load_config()`: Uses default ConfigManager instance
+- `save_config(config)`: Uses default ConfigManager instance
+- `get_default_config()`: Returns default configuration
+- `validate_config(config)`: Validates configuration
+- `ensure_config_exists()`: Creates default config
+
+**Type Hints:** Full type annotations
+
+**Architecture:**
+- v1.0.0-1.0.3: Module-level functions only
+- v1.1.0: ConfigManager class with caching and multi-file support
+
+### data_extractor.py (Data Extraction) [v1.1.0]
+Extracts and transforms Claude Code JSON data into structured format.
+
+**Classes:**
+- `DataExtractor`: Organized extraction with specialized methods
+  - `extract(json_data, config) -> Dict[str, Any]`: Main extraction orchestrator
+  - `_extract_model(json_data)`: Extract model information
+  - `_extract_version(json_data)`: Extract version string
+  - `_extract_context(json_data)`: Extract context window and tokens
+  - `_extract_workspace(json_data)`: Extract directory and git branch
+  - `_extract_cost(json_data, accumulated_data)`: Extract cost, duration, rates
+  - `_extract_output_style(json_data)`: Extract output style
+
+**Module-level Functions (backward compatibility):**
+- `extract_data(json_data, config)`: Uses default DataExtractor instance
+
+**Type Hints:** Full type annotations with Dict[str, Any]
+
+**Architecture:**
+- v1.0.0-1.0.3: 73-line extract_data() function in statusline.py
+- v1.1.0: DataExtractor class with focused methods (Single Responsibility)
+
+### display_formatter.py (Output Formatting) [v1.0.4]
+Formats statusline using StatusLineFormatter class and Field hierarchy.
+
+**Classes:**
+- `StatusLineFormatter`: Main formatter class
+  - `__init__()`: Initialize with field registry
+  - `get_field(field_name) -> Field`: Get field instance
+  - `format(data, config, verbose=False) -> str`: Main formatting method
+  - `format_compact(data, config) -> str`: Compact mode formatting
+  - `format_verbose(data, config) -> str`: Verbose mode formatting
+
+**Module-level Functions (backward compatibility):**
+- `format_compact(data, config)`: Uses default formatter
+- `format_verbose(data, config)`: Uses default formatter
+- `format_statusline(data, config, verbose)`: Uses default formatter
+- Legacy helpers: `format_progress_bar`, `format_field`, `format_duration`
+
+**Type Hints:** Full type annotations
+
+**Architecture:**
+- v1.0.0-1.0.1: Procedural with duplication
+- v1.0.2: Eliminated duplication, added line grouping
+- v1.0.3: OOP refactoring with Field classes
+- v1.0.4: StatusLineFormatter class with field registry
 
 ### git_utils.py (Git Integration)
-- Detects git branch
-- Handles worktrees
-- Graceful fallback
-- Fast file-based detection with command fallback
-- Uses constants.py for configuration values
+Fast git branch detection with graceful fallback.
 
 **Key Functions:**
 - `get_git_branch(cwd: str) -> str`: Get current branch name
 
 **Performance:**
-- Primary method: Fast `.git/HEAD` file reading
-- Fallback: Git command with 0.5s timeout (reduced from 2s in v1.0.2)
+- Primary: Fast `.git/HEAD` file reading
+- Fallback: Git command with 0.5s timeout
 
 **Type Hints:** Full type annotations
 
-**Architecture (v1.0.3+):** Uses constants.py for timeout values and git prefixes
+**Uses:** constants/display.py for git settings
 
 ### colors.py (Color Management)
-- ANSI color code definitions
-- Color application functions
-- NO_COLOR support
-- Module-level color override for config-based disabling
+ANSI color codes and color application functions.
 
 **Module Variables:**
 - `COLORS: Dict[str, str]`: ANSI color code mapping
-- `_color_override: Optional[bool]`: Module-level override set by statusline.py
+- `_color_override: Optional[bool]`: Module-level override
 
 **Key Functions:**
 - `colorize(text: str, color_name: str) -> str`: Apply color to text
-- `is_color_enabled() -> bool`: Check color support
-- `reset() -> str`: Return reset code
+- `is_color_enabled() -> bool`: Check color support (NO_COLOR aware)
+- `reset() -> str`: Return ANSI reset code
 
 **Type Hints:** Full type annotations
 
-### constants.py (Constants and Defaults) [v1.0.3+]
-- Centralized constants, defaults, and validation rules
-- Eliminates hardcoded values throughout codebase
-- Single source of truth for all configuration
+### constants/ (Constants Package) [v1.1.0]
+Organized constants split into focused modules.
 
-**Constants Defined:**
-- Field name constants: `FIELD_MODEL`, `FIELD_VERSION`, `FIELD_COST`, etc.
-- Display modes: `DISPLAY_MODE_COMPACT`, `DISPLAY_MODE_VERBOSE`
-- Line assignments: `LINE_IDENTITY`, `LINE_STATUS`, `LINE_METRICS`
-- Default colors: `DEFAULT_COLORS` dictionary
-- Default icons: `DEFAULT_ICONS` dictionary
-- Valid values: `VALID_COLORS`, `VALID_DISPLAY_MODES`, `VALID_FIELD_NAMES`
-- Configuration defaults: `DEFAULT_VISIBLE_FIELDS`, `DEFAULT_FIELD_ORDER`
-- Time conversion constants: `MILLISECONDS_PER_SECOND`, `SECONDS_PER_MINUTE`, etc.
-- Git constants: `GIT_HEAD_REF_PREFIX`, `GIT_COMMAND_TIMEOUT_SECONDS`
+**Structure:**
+- `constants/__init__.py`: Re-exports all for backward compatibility
+- `constants/fields.py`: Field names, labels, icons, line assignments
+- `constants/colors.py`: Color definitions and default mappings
+- `constants/config.py`: Configuration keys and defaults
+- `constants/display.py`: Display modes, icons, time formatting, git settings
 
-**Type Hints:** Full type annotations
+**Benefits:**
+- Better organization (247 lines → 4 focused modules)
+- Logical grouping of related constants
+- Easier to navigate and extend
+- Full backward compatibility
 
-**Architecture:** Foundation of OOP refactoring - all modules import constants instead of using magic values
+**Architecture:**
+- v1.0.0-1.0.2: Magic values scattered in code
+- v1.0.3: Centralized constants.py (247 lines)
+- v1.1.0: Organized into constants/ package with 4 modules
 
-### fields.py (Field Class Hierarchy) [v1.0.3+]
-- Object-oriented field formatting architecture
-- Each field knows how to format itself
-- Eliminates code duplication in display_formatter.py
+### fields.py (Field Class Hierarchy) [v1.0.3]
+Object-oriented field formatting with Strategy pattern.
 
 **Field Classes:**
-- `Field` (ABC): Base class with `format()`, `format_compact()`, `format_verbose()` methods
+- `Field` (ABC): Base class with abstract methods
 - `SimpleField`: Direct value display (model, version, directory, git_branch)
 - `ProgressField`: Percentage with optional progress bar (context_remaining)
 - `MetricField`: Metrics with optional rates (tokens with tpm, cost with $/h)
 - `DurationField`: Time formatting from milliseconds (duration)
 
 **Key Functions:**
-- `create_field_registry() -> Dict[str, Field]`: Creates registry of all available fields
+- `create_field_registry() -> Dict[str, Field]`: Creates field registry
 
-**Type Hints:** Full type annotations with ABC for base class
+**Type Hints:** Full type annotations with ABC
 
-**Architecture:** Implements Strategy pattern - each field type encapsulates formatting logic
+**Architecture:** Implements Strategy pattern for formatting logic
 
-### models.py (Data Models) [v1.0.3+]
-- Typed interfaces for data and configuration
-- Provides property-based access with type safety
-- Improves code readability and maintainability
+### models.py (Data Models) [v1.0.3]
+Typed interfaces for data and configuration dictionaries.
 
 **Classes:**
-- `StatusLineData`: Typed wrapper for extracted data dictionary with properties for each field
-- `Configuration`: Typed wrapper for configuration dictionary with helper methods
+- `StatusLineData`: Typed wrapper for extracted data
+  - Property methods for all fields
+  - `get(key, default=None)`: Dictionary-style access
+  - `to_dict()`: Convert to dictionary
+
+- `Configuration`: Typed wrapper for configuration
+  - Property methods with defaults
+  - `is_field_visible(field)`: Check field visibility
+  - `get_icon(key)`: Get icon with fallback
+  - `get_color(key, default)`: Get color with fallback
 
 **Type Hints:** Full type annotations
 
-**Architecture:** Provides type-safe access layer over raw dictionaries
+**Architecture:** Type-safe access layer over dictionaries
+
+### exceptions.py (Custom Exceptions) [v1.0.4]
+Hierarchical exception classes for better error handling.
+
+**Exception Classes:**
+- `StatusLineError`: Base exception for all statusline errors
+- `ConfigurationError`: Invalid configuration issues
+- `FieldNotFoundError`: Field not found in registry (stores field_name)
+- `InvalidJSONError`: JSON parsing failures
+- `ValidationError`: Data validation failures
+
+**Type Hints:** Full type annotations
+
+**Benefits:** Specific error handling and better debugging
 
 ### configure.py (Interactive Configuration)
-- Menu-driven configuration
-- Field toggling
-- Icon/color customization
-- Preview functionality
+Menu-driven configuration tool (unchanged in v1.1.0).
 
 **Key Functions:**
-- `main()`: Entry point for config tool
+- `main()`: Entry point
 - `show_menu(config)`: Display main menu
 - `toggle_fields_menu(config)`: Toggle field visibility
 - `customize_icons_menu(config)`: Customize icons
@@ -266,7 +343,7 @@ Claude Code displays statusline
 ./install.sh
     │
     ├─> Create ~/.claude-code-statusline/
-    ├─> Copy src/* to installation directory
+    ├─> Copy src/* to installation directory (including constants/ package)
     ├─> Make scripts executable
     ├─> Create symlink (optional)
     ├─> Generate default config.json (via install_helper.py)
@@ -299,23 +376,24 @@ Claude Code displays statusline
 
 ## Testing Strategy
 
-### Automated Testing (v1.0.2+)
-- **90 comprehensive tests** (79 unit + 11 integration)
-- Test framework: pytest
-- Coverage: 53% overall, 92%+ on core modules
+### Automated Testing (v1.0.4)
+- **154 comprehensive tests** (143 unit + 11 integration)
+- Test framework: pytest with pytest-cov
+- Coverage: 70% overall (96.3% excluding interactive CLI)
 - Run with: `python3 -m pytest tests/`
 
-**Test Coverage:**
+**Test Coverage by Module:**
 - `test_colors.py`: 10 tests, 100% coverage
 - `test_git_utils.py`: 10 tests, 100% coverage
-- `test_display_formatter.py`: 21 tests, 92% coverage
-- `test_statusline.py`: 25 tests, 92% coverage
-- `test_config_manager.py`: 13 tests, 74% coverage
-- `test_integration.py`: 11 integration tests (v1.0.3+)
-  - Full statusline output verification with icons
+- `test_exceptions.py`: 10 tests, 100% coverage
+- `test_models.py`: 54 tests, 100% coverage
+- `test_display_formatter.py`: 25 tests, 97% coverage
+- `test_statusline.py`: 21 tests, 93% coverage
+- `test_config_manager.py`: 20 tests, 93% coverage
+- `test_integration.py`: 11 integration tests
+  - Full statusline output verification
   - End-to-end workflow testing
   - Installation helper testing
-  - Visual output validation
 
 ### Manual Testing
 - Tests compact/verbose modes
@@ -333,23 +411,64 @@ Claude Code displays statusline
 
 - **Startup Time**: < 100ms typical
 - **Memory Usage**: < 10MB
-- **Dependencies**: Python stdlib only
-- **Git Detection**: Fast file read, command fallback
+- **Dependencies**: Python stdlib only (zero runtime dependencies)
+- **Git Detection**: Fast file read with command fallback
 
-## Extension Points
+## Extension Points (v1.1.0)
 
-The OOP architecture (v1.0.3+) makes extension easy:
+The OOP architecture makes extension straightforward:
 
-1. **New fields**: Add constants, extract data in `statusline.py`, create Field instance in `fields.py` registry
-2. **Custom field types**: Subclass `Field` in `fields.py` for custom formatting logic
-3. **New configuration options**: Add defaults to `constants.py`, validation to `config_manager.py`
-4. **New detection utilities**: Add to `git_utils.py` or create new utility modules
+1. **New fields**:
+   - Add field constants to `constants/fields.py`
+   - Add extraction logic to `DataExtractor` class in `data_extractor.py`
+   - Create Field instance in `fields.py` registry
 
-See `EXTENDING.md` for detailed step-by-step guides and examples.
+2. **Custom field types**:
+   - Subclass `Field` in `fields.py` with custom formatting logic
+
+3. **New configuration options**:
+   - Add defaults to appropriate `constants/` module
+   - Add validation to `ConfigManager.validate()` method
+
+4. **Programmatic use**:
+   - Import and use `StatusLine` facade class directly
+   - No need to invoke CLI or use stdin/stdout
+
+5. **Custom configuration sources**:
+   - Create ConfigManager with custom file path
+   - Inject custom ConfigManager into StatusLine
+
+See `EXTENDING.md` for detailed guides and examples.
+
+## Architecture Evolution
+
+### v1.0.0-1.0.2: Procedural
+- Module-level functions
+- Code duplication
+- Magic values in code
+
+### v1.0.3: OOP Refactoring
+- Field class hierarchy
+- Centralized constants.py
+- Data model classes
+
+### v1.0.4: Exception Handling & Testing
+- Custom exception hierarchy
+- StatusLineFormatter class
+- Logging infrastructure
+- 154 tests, 70% coverage
+
+### v1.1.0: Facade Pattern
+- ConfigManager class (stateful, with caching)
+- DataExtractor class (organized extraction)
+- StatusLine facade (clean API)
+- Organized constants/ package
+- Simplified main() (50 lines → 15 lines)
 
 ## Maintenance
 
 - Keep documentation synchronized with code
-- Test on multiple Python versions (3.6+)
-- Verify terminal compatibility
-- Update CHANGELOG.md for releases
+- Test on Python 3.6, 3.7, 3.8+ versions
+- Verify terminal compatibility (ANSI colors, NO_COLOR support)
+- Update CHANGELOG.md for all releases
+- Run full test suite before releases: `python3 -m pytest tests/ -v --cov=src`

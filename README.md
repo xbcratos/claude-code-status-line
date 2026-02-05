@@ -191,7 +191,7 @@ echo '{"model":{"display_name":"Sonnet 4"},"version":"v1.0.85","context_window":
 
 ### Automated Testing
 
-The project includes a comprehensive test suite with 90 tests (79 unit tests + 11 integration tests) covering all core functionality.
+The project includes a comprehensive test suite with **154 tests** covering all core functionality.
 
 **Run tests:**
 ```bash
@@ -205,12 +205,17 @@ python3 -m pytest tests/
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-**Test coverage:**
+**Test coverage (v1.1.0):**
+- Overall: 70% coverage
 - colors.py: 100%
 - git_utils.py: 100%
-- display_formatter.py: 92%
-- statusline.py: 92%
-- config_manager.py: 74%
+- exceptions.py: 100%
+- models.py: 100%
+- display_formatter.py: 97%
+- statusline.py: 93%
+- config_manager.py: 93%
+
+Test breakdown: 143 unit tests + 11 integration tests
 
 ## Troubleshooting
 
