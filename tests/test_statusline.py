@@ -171,12 +171,19 @@ class TestExtractData:
         assert result["output_style"] == "markdown"
 
     def test_extract_empty_data(self):
-        """Test handles empty JSON gracefully."""
+        """Test handles empty JSON gracefully and extracts system fields."""
         json_data = {}
         config = {}
         result = extract_data(json_data, config)
         assert isinstance(result, dict)
-        assert len(result) == 0
+        # System fields (CPU, memory, battery, python_version, datetime) are always extracted
+        # even with empty JSON input since they don't depend on Claude's JSON data
+        assert "python_version" in result
+        assert "datetime" in result
+        # Optional system fields may be present depending on platform
+        for field in ["cpu_usage", "memory_usage", "battery"]:
+            if field in result:
+                assert isinstance(result[field], str)
 
 
 class TestMain:

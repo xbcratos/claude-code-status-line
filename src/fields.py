@@ -368,4 +368,40 @@ def create_field_registry() -> Dict[str, Field]:
             label=constants.FIELD_LABELS[constants.FIELD_LINES_CHANGED],
             color_key=constants.ICON_KEY_LINES_CHANGED
         ),
+        constants.FIELD_CPU_USAGE: SimpleField(
+            name=constants.FIELD_CPU_USAGE,
+            icon_key=constants.ICON_KEY_CPU,
+            line=constants.LINE_METRICS,
+            label=constants.FIELD_LABELS[constants.FIELD_CPU_USAGE]
+        ),
+        constants.FIELD_MEMORY_USAGE: SimpleField(
+            name=constants.FIELD_MEMORY_USAGE,
+            icon_key=constants.ICON_KEY_MEMORY,
+            line=constants.LINE_METRICS,
+            label=constants.FIELD_LABELS[constants.FIELD_MEMORY_USAGE]
+        ),
+        constants.FIELD_BATTERY: SimpleField(
+            name=constants.FIELD_BATTERY,
+            icon_key=constants.ICON_KEY_BATTERY,
+            line=constants.LINE_METRICS,
+            label=constants.FIELD_LABELS[constants.FIELD_BATTERY]
+        ),
+        constants.FIELD_PYTHON_VERSION: SimpleField(
+            name=constants.FIELD_PYTHON_VERSION,
+            icon_key=constants.ICON_KEY_PYTHON,
+            line=constants.LINE_IDENTITY,
+            label=constants.FIELD_LABELS[constants.FIELD_PYTHON_VERSION]
+        ),
+        constants.FIELD_PYTHON_VENV: SimpleField(
+            name=constants.FIELD_PYTHON_VENV,
+            icon_key=constants.ICON_KEY_PYTHON,
+            line=constants.LINE_METRICS,
+            label=constants.FIELD_LABELS[constants.FIELD_PYTHON_VENV]
+        ),
+        constants.FIELD_DATETIME: SimpleField(
+            name=constants.FIELD_DATETIME,
+            icon_key=constants.ICON_KEY_DATETIME,
+            line=constants.LINE_IDENTITY,
+            label=constants.FIELD_LABELS[constants.FIELD_DATETIME]
+        ),
     }

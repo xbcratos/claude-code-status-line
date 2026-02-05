@@ -275,11 +275,85 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All 154 tests continue to pass
 - Configuration file format remains unchanged
 
+## [1.2.0] - 2026-02-05
+
+### Added
+- **System Monitoring Fields**: Real-time system resource monitoring
+  - `cpu_usage`: Current CPU usage percentage (cross-platform: Linux, macOS, Windows)
+  - `memory_usage`: Memory usage display (shows used memory in GB or as percentage)
+  - `battery`: Battery level percentage (laptops only, gracefully omitted on desktops)
+  - All system fields use platform-specific APIs with graceful degradation
+  - Zero external dependencies (uses only Python stdlib)
+
+- **Python Environment Detection**:
+  - `python_version`: Current Python version (e.g., "3.11.5")
+  - `python_venv`: Virtual environment name when active
+  - Positioned on LINE_IDENTITY alongside model and version info
+
+- **Date and Time Display**:
+  - `datetime`: Current date and time with seconds precision
+  - Format: "YYYY-MM-DD HH:MM:SS"
+  - Positioned on LINE_IDENTITY for quick reference
+
+- **Enhanced Git Status Integration**:
+  - Git dirty/clean indicator: "✓" for clean, "★" for uncommitted changes
+  - Ahead/behind tracking: "↑N" for commits ahead, "↓N" for commits behind
+  - Combined with existing git_branch field (e.g., "main ★ ↑2")
+  - Uses `git status --porcelain` and `git rev-list` commands
+  - Graceful handling when no upstream branch is configured
+
+- **New Utility Modules**:
+  - `system_utils.py`: Cross-platform system monitoring functions
+  - `python_utils.py`: Python environment detection utilities
+  - Enhanced `git_utils.py` with status functions
+
+### Changed
+- **Field Positioning**: Reorganized LINE_IDENTITY (line 1) to include:
+  - Current directory, git branch (with status), model, version, output style, python version, datetime
+  - System monitoring fields (CPU, memory, battery, python venv) remain on LINE_METRICS (line 3)
+
+- **Default Configuration**: All new fields enabled by default
+  - Users can disable unwanted fields via configure.py or config.json
+  - New fields automatically added to existing configurations on first run
+
+- **Config Manager Enhancement**: Improved field merging logic
+  - Now always adds missing valid fields to existing configurations
+  - Ensures new fields appear in statusline even with older config files
+
+### Fixed
+- **Config Validation Bug**: Fixed issue where new fields weren't added to field_order unless config had invalid fields
+  - Moved field addition logic outside conditional block
+  - Ensures backward compatibility with existing configurations
+
+### Testing
+- **Comprehensive Test Coverage for Git Status**:
+  - Added 22 new tests covering `_is_git_dirty()`, `_get_ahead_behind()`, and `get_git_status()`
+  - Tests cover success cases, edge cases, and error handling
+  - Mock-based testing for platform-independent validation
+  - **git_utils.py coverage: 55% → 100%**
+  - **Overall test coverage: 65% → 67%**
+  - **Total tests: 154 → 176 tests**
+  - All tests passing
+
+### Technical Details
+- Cross-platform system monitoring:
+  - **Linux**: Reads `/proc/stat` for CPU, `/proc/meminfo` for memory
+  - **macOS**: Uses `top` command for CPU, `vm_stat` for memory, `pmset` for battery
+  - **Windows**: Uses `wmic` commands for system metrics
+- Git status uses fast subprocess calls with 0.5s timeout
+- All new functionality uses only Python standard library
+- Maintains zero external dependencies
+
+### Documentation
+- Updated field constants in `constants/fields.py`
+- Added field labels for verbose mode display
+- Updated default field order and visibility settings
+- Enhanced `EXTENDING.md` with external data sources example (git branch)
+
 ## [Unreleased]
 
 ### Possible Future Enhancements
 - Multiple configuration profiles
-- Language/runtime version detection
 - Custom field expressions/formulas
 - Export/import configuration
 - Shell completion for configure.py

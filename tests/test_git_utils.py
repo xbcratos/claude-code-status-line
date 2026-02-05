@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch, mock_open
 # Add src directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from git_utils import get_git_branch
+from git_utils import get_git_branch, get_git_status, _is_git_dirty, _get_ahead_behind
 
 
 class TestGetGitBranch:
@@ -110,3 +110,259 @@ class TestGetGitBranch:
                 mock_run.return_value.returncode = 1
                 result = get_git_branch(str(tmp_path))
                 assert result == ""
+
+
+class TestIsGitDirty:
+    """Tests for _is_git_dirty function."""
+
+    def test_clean_repository(self, tmp_path):
+        """Test returns False for clean repository."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = ""
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = _is_git_dirty(str(tmp_path))
+            assert result is False
+
+    def test_dirty_repository_with_changes(self, tmp_path):
+        """Test returns True when there are uncommitted changes."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = " M src/file.py\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = _is_git_dirty(str(tmp_path))
+            assert result is True
+
+    def test_dirty_repository_with_untracked_files(self, tmp_path):
+        """Test returns True for untracked files."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "?? newfile.py\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = _is_git_dirty(str(tmp_path))
+            assert result is True
+
+    def test_git_command_failure(self, tmp_path):
+        """Test returns None when git command fails."""
+        mock_result = Mock()
+        mock_result.returncode = 128
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = _is_git_dirty(str(tmp_path))
+            assert result is None
+
+    def test_git_not_installed(self, tmp_path):
+        """Test returns None when git is not installed."""
+        with patch('subprocess.run', side_effect=FileNotFoundError):
+            result = _is_git_dirty(str(tmp_path))
+            assert result is None
+
+    def test_subprocess_error(self, tmp_path):
+        """Test returns None on subprocess error."""
+        with patch('subprocess.run', side_effect=subprocess.SubprocessError):
+            result = _is_git_dirty(str(tmp_path))
+            assert result is None
+
+
+class TestGetAheadBehind:
+    """Tests for _get_ahead_behind function."""
+
+    def test_up_to_date_with_remote(self, tmp_path):
+        """Test returns (0, 0) when up-to-date with remote."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "0\t0\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 0
+            assert behind == 0
+
+    def test_ahead_of_remote(self, tmp_path):
+        """Test returns correct count when ahead of remote."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "3\t0\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 3
+            assert behind == 0
+
+    def test_behind_remote(self, tmp_path):
+        """Test returns correct count when behind remote."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "0\t5\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 0
+            assert behind == 5
+
+    def test_both_ahead_and_behind(self, tmp_path):
+        """Test returns correct counts when both ahead and behind."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "2\t3\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 2
+            assert behind == 3
+
+    def test_no_upstream_branch(self, tmp_path):
+        """Test returns (0, 0) when no upstream branch is configured."""
+        mock_result = Mock()
+        mock_result.returncode = 128
+        mock_result.stdout = ""
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 0
+            assert behind == 0
+
+    def test_git_command_failure(self, tmp_path):
+        """Test returns (0, 0) on git command failure."""
+        with patch('subprocess.run', side_effect=subprocess.SubprocessError):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 0
+            assert behind == 0
+
+    def test_invalid_output_format(self, tmp_path):
+        """Test returns (0, 0) when output format is unexpected."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "invalid\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 0
+            assert behind == 0
+
+    def test_non_integer_values(self, tmp_path):
+        """Test returns (0, 0) when output contains non-integer values."""
+        mock_result = Mock()
+        mock_result.returncode = 0
+        mock_result.stdout = "abc\tdef\n"
+
+        with patch('subprocess.run', return_value=mock_result):
+            ahead, behind = _get_ahead_behind(str(tmp_path))
+            assert ahead == 0
+            assert behind == 0
+
+
+class TestGetGitStatus:
+    """Tests for get_git_status function."""
+
+    def test_clean_and_up_to_date(self, tmp_path):
+        """Test shows checkmark for clean, up-to-date repository."""
+        # Mock git rev-parse (check if in git repo)
+        mock_rev_parse = Mock()
+        mock_rev_parse.returncode = 0
+
+        # Mock git status --porcelain (clean)
+        mock_status = Mock()
+        mock_status.returncode = 0
+        mock_status.stdout = ""
+
+        # Mock git rev-list (up-to-date)
+        mock_rev_list = Mock()
+        mock_rev_list.returncode = 0
+        mock_rev_list.stdout = "0\t0\n"
+
+        with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
+            result = get_git_status(str(tmp_path))
+            assert result == "✓"
+
+    def test_dirty_repository(self, tmp_path):
+        """Test shows star for dirty repository."""
+        mock_rev_parse = Mock()
+        mock_rev_parse.returncode = 0
+
+        mock_status = Mock()
+        mock_status.returncode = 0
+        mock_status.stdout = " M file.py\n"
+
+        mock_rev_list = Mock()
+        mock_rev_list.returncode = 0
+        mock_rev_list.stdout = "0\t0\n"
+
+        with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
+            result = get_git_status(str(tmp_path))
+            assert result == "★"
+
+    def test_ahead_of_remote(self, tmp_path):
+        """Test shows ahead indicator."""
+        mock_rev_parse = Mock()
+        mock_rev_parse.returncode = 0
+
+        mock_status = Mock()
+        mock_status.returncode = 0
+        mock_status.stdout = ""
+
+        mock_rev_list = Mock()
+        mock_rev_list.returncode = 0
+        mock_rev_list.stdout = "2\t0\n"
+
+        with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
+            result = get_git_status(str(tmp_path))
+            assert result == "✓ ↑2"
+
+    def test_behind_remote(self, tmp_path):
+        """Test shows behind indicator."""
+        mock_rev_parse = Mock()
+        mock_rev_parse.returncode = 0
+
+        mock_status = Mock()
+        mock_status.returncode = 0
+        mock_status.stdout = ""
+
+        mock_rev_list = Mock()
+        mock_rev_list.returncode = 0
+        mock_rev_list.stdout = "0\t3\n"
+
+        with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
+            result = get_git_status(str(tmp_path))
+            assert result == "✓ ↓3"
+
+    def test_dirty_ahead_and_behind(self, tmp_path):
+        """Test shows all indicators when dirty, ahead, and behind."""
+        mock_rev_parse = Mock()
+        mock_rev_parse.returncode = 0
+
+        mock_status = Mock()
+        mock_status.returncode = 0
+        mock_status.stdout = "?? newfile.py\n"
+
+        mock_rev_list = Mock()
+        mock_rev_list.returncode = 0
+        mock_rev_list.stdout = "1\t2\n"
+
+        with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
+            result = get_git_status(str(tmp_path))
+            assert result == "★ ↓2 ↑1"
+
+    def test_not_in_git_repository(self, tmp_path):
+        """Test returns empty string when not in git repository."""
+        mock_result = Mock()
+        mock_result.returncode = 128
+
+        with patch('subprocess.run', return_value=mock_result):
+            result = get_git_status(str(tmp_path))
+            assert result == ""
+
+    def test_git_command_error(self, tmp_path):
+        """Test returns empty string on git command error."""
+        with patch('subprocess.run', side_effect=subprocess.SubprocessError):
+            result = get_git_status(str(tmp_path))
+            assert result == ""
+
+    def test_git_not_installed(self, tmp_path):
+        """Test returns empty string when git is not installed."""
+        with patch('subprocess.run', side_effect=FileNotFoundError):
+            result = get_git_status(str(tmp_path))
+            assert result == ""

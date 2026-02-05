@@ -1,4 +1,4 @@
-# Extending the Statusline Tool (v1.1.0+)
+# Extending the Statusline Tool (v1.2.0)
 
 This guide explains how to add new fields and features to the Claude Code Statusline Tool using the object-oriented architecture (v1.0.3+) and facade pattern (v1.1.0+).
 

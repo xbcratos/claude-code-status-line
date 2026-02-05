@@ -109,10 +109,11 @@ class ConfigManager:
             if invalid_fields:
                 warnings.append(f"Invalid field names in field_order: {', '.join(invalid_fields)}")
                 config["field_order"] = [f for f in config["field_order"] if f in constants.VALID_FIELD_NAMES]
-                # Add any missing valid fields
-                for field in constants.VALID_FIELD_NAMES:
-                    if field not in config["field_order"]:
-                        config["field_order"].append(field)
+
+            # Add any missing valid fields
+            for field in constants.VALID_FIELD_NAMES:
+                if field not in config["field_order"]:
+                    config["field_order"].append(field)
 
         # Log warnings if any
         if warnings:

@@ -19,6 +19,12 @@ from .fields import (
     FIELD_COST,
     FIELD_TOKENS,
     FIELD_LINES_CHANGED,
+    FIELD_CPU_USAGE,
+    FIELD_MEMORY_USAGE,
+    FIELD_BATTERY,
+    FIELD_PYTHON_VERSION,
+    FIELD_PYTHON_VENV,
+    FIELD_DATETIME,
 )
 
 # ============================================================================
@@ -50,11 +56,17 @@ FIELD_LINE_ASSIGNMENT: Dict[str, int] = {
     FIELD_MODEL: LINE_IDENTITY,
     FIELD_VERSION: LINE_IDENTITY,
     FIELD_OUTPUT_STYLE: LINE_IDENTITY,
+    FIELD_PYTHON_VERSION: LINE_IDENTITY,
+    FIELD_DATETIME: LINE_IDENTITY,
     FIELD_CONTEXT_REMAINING: LINE_STATUS,
     FIELD_DURATION: LINE_STATUS,
     FIELD_COST: LINE_METRICS,
     FIELD_TOKENS: LINE_METRICS,
     FIELD_LINES_CHANGED: LINE_METRICS,
+    FIELD_CPU_USAGE: LINE_METRICS,
+    FIELD_MEMORY_USAGE: LINE_METRICS,
+    FIELD_BATTERY: LINE_METRICS,
+    FIELD_PYTHON_VENV: LINE_METRICS,
 }
 
 # ============================================================================
@@ -71,6 +83,11 @@ DEFAULT_ICONS: Dict[str, str] = {
     "tokens": "📊",
     "duration": "⌛",
     "style": "🎨",
+    "cpu": "💻",
+    "memory": "🧮",
+    "battery": "🔋",
+    "python": "🐍",
+    "datetime": "🕐",
 }
 
 # ============================================================================

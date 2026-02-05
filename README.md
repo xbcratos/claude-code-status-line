@@ -14,11 +14,14 @@ A highly customizable statusline tool for Claude Code that provides fine-grained
 
 - **Two Display Modes**: Compact (icons only) and verbose (labeled) formats to suit your preferences
 - **Fine-grained Control**: Show/hide individual fields like model, version, context, tokens, cost, git branch, and more
+- **System Monitoring** (v1.2.0+): Real-time CPU usage, memory usage, and battery level display
+- **Python Environment Detection** (v1.2.0+): Display Python version and active virtual environment
+- **Enhanced Git Status** (v1.2.0+): Shows clean/dirty state and commits ahead/behind remote
+- **Date/Time Display** (v1.2.0+): Current timestamp with seconds precision
 - **Custom Colors**: Full ANSI color customization with light/bright variants for better visibility
 - **Custom Icons**: Customize or remove icons for each field
 - **Field Ordering**: Reorder fields in any sequence you prefer
 - **Progress Bars**: Visual progress bars for context usage
-- **Git Integration**: Automatic git branch detection
 - **Interactive Configuration**: Easy-to-use CLI for customizing all settings
 - **Persistent Config**: Settings are saved and persist across sessions
 
@@ -83,30 +86,41 @@ The configuration tool provides:
 
 **Compact Mode** (default) - Icons and values only:
 ```
-📁 my-project  🤖 claude-sonnet-4-5-20250929  📟 v1.0.85
+📁 my-project  🌿 main ✓  🤖 claude-sonnet-4-5-20250929  📟 v1.0.85  🐍 3.11.5  🕐 2026-02-05 15:30:42
 🧠 Context Remaining: 85% [========--]
-📊 75000 tok (2500 tpm)  💰 $12.50 ($25.00/h)
+📊 75000 tok (2500 tpm)  💰 $12.50 ($25.00/h)  🖥️ 25%  🧠 8.5GB  🔋 85%
 ```
 
 **Verbose Mode** - Labeled fields for clarity:
 ```
-📁 Directory: my-project  🤖 Model: claude-sonnet-4-5-20250929  📟 Version: v1.0.85
+📁 Directory: my-project  🌿 Git branch: main ✓  🤖 Model: claude-sonnet-4-5-20250929  📟 Version: v1.0.85  🐍 Python: 3.11.5  🕐 Time: 2026-02-05 15:30:42
 🧠 Context remaining: 85% [========--]  ⌛ Duration: 30m
-📊 Tokens: 75000 tok (2500 tpm)  💰 Cost: $12.50 ($25.00/h)
+📊 Tokens: 75000 tok (2500 tpm)  💰 Cost: $12.50 ($25.00/h)  🖥️ CPU: 25%  🧠 Memory: 8.5GB  🔋 Battery: 85%
 ```
 
 ### Available Fields
 
+**Session Information:**
 - **Model**: Claude model ID (e.g., "claude-sonnet-4-5-20250929")
 - **Version**: Claude Code version
 - **Context Remaining**: Percentage of context window remaining (with progress bar)
 - **Tokens**: Total input + output tokens (with tokens per minute)
 - **Current Directory**: Current working directory name
-- **Git Branch**: Current git branch
+- **Git Branch**: Current git branch with status indicators (✓ clean, ★ dirty, ↑N ahead, ↓N behind)
 - **Cost**: Total cost in USD (with cost per hour)
 - **Duration**: Session duration
 - **Lines Changed**: Total lines added + removed
 - **Output Style**: Output style name
+
+**System Monitoring (v1.2.0+):**
+- **CPU Usage**: Current CPU usage percentage
+- **Memory Usage**: Current memory usage (GB or percentage)
+- **Battery**: Battery level percentage (laptops only)
+
+**Python Environment (v1.2.0+):**
+- **Python Version**: Current Python interpreter version
+- **Python Venv**: Active virtual environment name
+- **Date/Time**: Current date and time with seconds precision
 
 ### Color Customization
 
@@ -205,17 +219,19 @@ python3 -m pytest tests/
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-**Test coverage (v1.1.0):**
-- Overall: 70% coverage
+**Test coverage (v1.2.0):**
+- Overall: 67% coverage (1241 statements)
 - colors.py: 100%
 - git_utils.py: 100%
 - exceptions.py: 100%
 - models.py: 100%
+- data_extractor.py: 97%
 - display_formatter.py: 97%
-- statusline.py: 93%
-- config_manager.py: 93%
+- config_manager.py: 94%
+- fields.py: 93%
+- statusline.py: 90%
 
-Test breakdown: 143 unit tests + 11 integration tests
+Test breakdown: 176 tests (165 unit tests + 11 integration tests)
 
 ## Troubleshooting
 

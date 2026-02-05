@@ -19,6 +19,12 @@ from .fields import (
     FIELD_DURATION,
     FIELD_OUTPUT_STYLE,
     FIELD_LINES_CHANGED,
+    FIELD_CPU_USAGE,
+    FIELD_MEMORY_USAGE,
+    FIELD_BATTERY,
+    FIELD_PYTHON_VERSION,
+    FIELD_PYTHON_VENV,
+    FIELD_DATETIME,
 )
 
 # ============================================================================
@@ -58,6 +64,12 @@ DEFAULT_COLORS: Dict[str, str] = {
     FIELD_DURATION: COLOR_MAGENTA,
     FIELD_OUTPUT_STYLE: COLOR_BLUE,
     FIELD_LINES_CHANGED: COLOR_CYAN,
+    FIELD_CPU_USAGE: COLOR_BLUE,
+    FIELD_MEMORY_USAGE: COLOR_MAGENTA,
+    FIELD_BATTERY: COLOR_GREEN,
+    FIELD_PYTHON_VERSION: COLOR_YELLOW,
+    FIELD_PYTHON_VENV: COLOR_CYAN,
+    FIELD_DATETIME: COLOR_WHITE,
     "progress_bar_filled": COLOR_GREEN,
     "progress_bar_empty": COLOR_WHITE,
     "separator": COLOR_WHITE,

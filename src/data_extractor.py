@@ -6,8 +6,12 @@ into a structured format for display.
 """
 
 import os
+from datetime import datetime
 from typing import Dict, Any
-from git_utils import get_git_branch
+
+from git_utils import get_git_branch, get_git_status
+from system_utils import get_cpu_usage, get_memory_usage, get_battery_status
+from python_utils import get_python_version, get_python_venv
 
 
 class DataExtractor:
@@ -37,6 +41,10 @@ class DataExtractor:
         # Pass accumulated data for cross-field calculations (e.g., tokens_per_minute)
         data.update(self._extract_cost(json_data, data))
         data.update(self._extract_output_style(json_data))
+        # System and environment fields
+        data.update(self._extract_system_info())
+        data.update(self._extract_python_info())
+        data.update(self._extract_datetime())
         return data
 
     def _extract_model(self, json_data: Dict[str, Any]) -> Dict[str, Any]:
@@ -112,7 +120,7 @@ class DataExtractor:
         """
         Extract workspace information.
 
-        Includes current directory (basename only) and git branch.
+        Includes current directory (basename only) and git branch with status.
 
         Args:
             json_data: Raw JSON data
@@ -128,7 +136,12 @@ class DataExtractor:
             # Get git branch for the workspace
             git_branch = get_git_branch(cwd)
             if git_branch:
-                data["git_branch"] = git_branch
+                # Get git status and append to branch if available
+                git_status = get_git_status(cwd)
+                if git_status:
+                    data["git_branch"] = f"{git_branch} {git_status}"
+                else:
+                    data["git_branch"] = git_branch
 
         return data
 
@@ -195,6 +208,65 @@ class DataExtractor:
         data = {}
         if "output_style" in json_data and "name" in json_data["output_style"]:
             data["output_style"] = json_data["output_style"]["name"]
+        return data
+
+    def _extract_system_info(self) -> Dict[str, Any]:
+        """
+        Extract system monitoring information.
+
+        Includes CPU usage, memory usage, and battery status.
+
+        Returns:
+            Dictionary with system info fields if available
+        """
+        data = {}
+
+        cpu = get_cpu_usage()
+        if cpu:
+            data["cpu_usage"] = cpu
+
+        memory = get_memory_usage()
+        if memory:
+            data["memory_usage"] = memory
+
+        battery = get_battery_status()
+        if battery:
+            data["battery"] = battery
+
+        return data
+
+    def _extract_python_info(self) -> Dict[str, Any]:
+        """
+        Extract Python environment information.
+
+        Includes Python version and virtual environment name.
+
+        Returns:
+            Dictionary with Python info fields if available
+        """
+        data = {}
+
+        python_version = get_python_version()
+        if python_version:
+            data["python_version"] = python_version
+
+        venv = get_python_venv()
+        if venv:
+            data["python_venv"] = venv
+
+        return data
+
+    def _extract_datetime(self) -> Dict[str, Any]:
+        """
+        Extract current date and time.
+
+        Returns:
+            Dictionary with 'datetime' key
+        """
+        data = {}
+        now = datetime.now()
+        # Format with seconds precision: YYYY-MM-DD HH:MM:SS
+        data["datetime"] = now.strftime("%Y-%m-%d %H:%M:%S")
         return data
 
 

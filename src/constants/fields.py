@@ -22,6 +22,14 @@ FIELD_DURATION = "duration"
 FIELD_LINES_CHANGED = "lines_changed"
 FIELD_OUTPUT_STYLE = "output_style"
 
+# System/Environment Fields
+FIELD_CPU_USAGE = "cpu_usage"
+FIELD_MEMORY_USAGE = "memory_usage"
+FIELD_BATTERY = "battery"
+FIELD_PYTHON_VERSION = "python_version"
+FIELD_PYTHON_VENV = "python_venv"
+FIELD_DATETIME = "datetime"
+
 # Calculated/Rate Fields
 FIELD_COST_PER_HOUR = "cost_per_hour"
 FIELD_TOKENS_PER_MINUTE = "tokens_per_minute"
@@ -38,6 +46,13 @@ ICON_KEY_COST = "cost"
 ICON_KEY_TOKENS = "tokens"
 ICON_KEY_LINES_CHANGED = "lines_changed"
 
+# System/Environment Icon Keys
+ICON_KEY_CPU = "cpu"
+ICON_KEY_MEMORY = "memory"
+ICON_KEY_BATTERY = "battery"
+ICON_KEY_PYTHON = "python"
+ICON_KEY_DATETIME = "datetime"
+
 # All valid field names in order
 VALID_FIELD_NAMES: List[str] = [
     FIELD_MODEL,
@@ -50,6 +65,12 @@ VALID_FIELD_NAMES: List[str] = [
     FIELD_DURATION,
     FIELD_LINES_CHANGED,
     FIELD_OUTPUT_STYLE,
+    FIELD_CPU_USAGE,
+    FIELD_MEMORY_USAGE,
+    FIELD_BATTERY,
+    FIELD_PYTHON_VERSION,
+    FIELD_PYTHON_VENV,
+    FIELD_DATETIME,
 ]
 
 # ============================================================================
@@ -67,6 +88,12 @@ FIELD_LABELS: Dict[str, str] = {
     FIELD_COST: "Cost:",
     FIELD_TOKENS: "Tokens:",
     FIELD_LINES_CHANGED: "Lines changed:",
+    FIELD_CPU_USAGE: "CPU:",
+    FIELD_MEMORY_USAGE: "Memory:",
+    FIELD_BATTERY: "Battery:",
+    FIELD_PYTHON_VERSION: "Python:",
+    FIELD_PYTHON_VENV: "Venv:",
+    FIELD_DATETIME: "Time:",
 }
 
 # ============================================================================
@@ -83,4 +110,10 @@ FIELD_ICON_KEYS: Dict[str, str] = {
     FIELD_TOKENS: "tokens",
     FIELD_DURATION: "duration",
     FIELD_OUTPUT_STYLE: "style",
+    FIELD_CPU_USAGE: "cpu",
+    FIELD_MEMORY_USAGE: "memory",
+    FIELD_BATTERY: "battery",
+    FIELD_PYTHON_VERSION: "python",
+    FIELD_PYTHON_VENV: "python",
+    FIELD_DATETIME: "datetime",
 }
