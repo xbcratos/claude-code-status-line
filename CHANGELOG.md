@@ -230,6 +230,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Removed due to Python version compatibility complexity
   - Simple `Dict[str, Any]` type hints are sufficient and clearer
 
+## [1.1.1] - 2026-02-05
+
+### Fixed
+- **Documentation Updates** (no code changes)
+- Updated README.md with correct test count (154 tests, was 90)
+- Updated README.md with current coverage percentages for v1.1.0
+- Fixed QUICKSTART.md reference from non-existent EXAMPLES.md to EXTENDING.md
+- Restored CODE_REVIEW.md (accidentally deleted in previous commit)
+- Updated CODE_REVIEW.md to reflect v1.1.0 completion status:
+  - Marked TypedDict as implemented then reverted
+  - Corrected "Split constants" completion (v1.1.0, not v2.0.0)
+  - Marked plugin system and config migration as not implemented
+- Updated EXTENDING.md for v1.1.0 architecture:
+  - Changed references from constants.py to constants/ package
+  - Updated data extraction examples to use DataExtractor class
+  - Added Key Architectural Benefits section
+
+### Notes
+- This is a documentation-only release with no code changes
+- All 154 tests continue to pass
+- Codebase functionality identical to v1.1.0
+
 ## [Unreleased]
 
 ### Possible Future Enhancements
