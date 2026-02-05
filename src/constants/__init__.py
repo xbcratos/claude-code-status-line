@@ -1,0 +1,171 @@
+"""
+Constants and configuration values for the Claude Code Statusline Tool.
+
+This module re-exports all constants from organized sub-modules for
+backward compatibility. Existing code can continue to import from
+'constants' while the implementation is organized into logical modules.
+
+Organization:
+- fields.py: Field names, labels, icons, and line assignments
+- colors.py: Color definitions and default color assignments
+- config.py: Configuration keys and default values
+- display.py: Display modes, icons, time formatting, git settings
+"""
+
+# Re-export all constants for backward compatibility
+
+# Field-related constants
+from .fields import (
+    FIELD_MODEL,
+    FIELD_VERSION,
+    FIELD_CONTEXT_REMAINING,
+    FIELD_TOKENS,
+    FIELD_CURRENT_DIR,
+    FIELD_GIT_BRANCH,
+    FIELD_COST,
+    FIELD_DURATION,
+    FIELD_LINES_CHANGED,
+    FIELD_OUTPUT_STYLE,
+    FIELD_COST_PER_HOUR,
+    FIELD_TOKENS_PER_MINUTE,
+    ICON_KEY_DIRECTORY,
+    ICON_KEY_GIT_BRANCH,
+    ICON_KEY_MODEL,
+    ICON_KEY_VERSION,
+    ICON_KEY_STYLE,
+    ICON_KEY_CONTEXT,
+    ICON_KEY_DURATION,
+    ICON_KEY_COST,
+    ICON_KEY_TOKENS,
+    ICON_KEY_LINES_CHANGED,
+    VALID_FIELD_NAMES,
+    FIELD_LABELS,
+    FIELD_ICON_KEYS,
+)
+
+# Color-related constants
+from .colors import (
+    COLOR_CYAN,
+    COLOR_GREEN,
+    COLOR_BLUE,
+    COLOR_MAGENTA,
+    COLOR_YELLOW,
+    COLOR_RED,
+    COLOR_WHITE,
+    VALID_COLORS,
+    DEFAULT_COLORS,
+)
+
+# Configuration-related constants
+from .config import (
+    CONFIG_KEY_DISPLAY_MODE,
+    CONFIG_KEY_VISIBLE_FIELDS,
+    CONFIG_KEY_FIELD_ORDER,
+    CONFIG_KEY_ICONS,
+    CONFIG_KEY_COLORS,
+    CONFIG_KEY_SHOW_PROGRESS_BARS,
+    CONFIG_KEY_PROGRESS_BAR_WIDTH,
+    CONFIG_KEY_ENABLE_COLORS,
+    MIN_PROGRESS_BAR_WIDTH,
+    MAX_PROGRESS_BAR_WIDTH,
+    DEFAULT_PROGRESS_BAR_WIDTH,
+    DEFAULT_SHOW_PROGRESS_BARS,
+    DEFAULT_ENABLE_COLORS,
+    DEFAULT_VISIBLE_FIELDS,
+    DEFAULT_FIELD_ORDER,
+)
+
+# Display-related constants
+from .display import (
+    DISPLAY_MODE_COMPACT,
+    DISPLAY_MODE_VERBOSE,
+    VALID_DISPLAY_MODES,
+    DEFAULT_DISPLAY_MODE,
+    LINE_IDENTITY,
+    LINE_STATUS,
+    LINE_METRICS,
+    FIELD_LINE_ASSIGNMENT,
+    DEFAULT_ICONS,
+    MILLISECONDS_PER_SECOND,
+    SECONDS_PER_MINUTE,
+    MINUTES_PER_HOUR,
+    MILLISECONDS_PER_MINUTE,
+    MILLISECONDS_PER_HOUR,
+    GIT_COMMAND_TIMEOUT_SECONDS,
+    GIT_HEAD_REF_PREFIX,
+    GIT_DETACHED_HEAD_HASH_LENGTH,
+)
+
+# Define __all__ for explicit exports
+__all__ = [
+    # Fields
+    "FIELD_MODEL",
+    "FIELD_VERSION",
+    "FIELD_CONTEXT_REMAINING",
+    "FIELD_TOKENS",
+    "FIELD_CURRENT_DIR",
+    "FIELD_GIT_BRANCH",
+    "FIELD_COST",
+    "FIELD_DURATION",
+    "FIELD_LINES_CHANGED",
+    "FIELD_OUTPUT_STYLE",
+    "FIELD_COST_PER_HOUR",
+    "FIELD_TOKENS_PER_MINUTE",
+    "ICON_KEY_DIRECTORY",
+    "ICON_KEY_GIT_BRANCH",
+    "ICON_KEY_MODEL",
+    "ICON_KEY_VERSION",
+    "ICON_KEY_STYLE",
+    "ICON_KEY_CONTEXT",
+    "ICON_KEY_DURATION",
+    "ICON_KEY_COST",
+    "ICON_KEY_TOKENS",
+    "ICON_KEY_LINES_CHANGED",
+    "VALID_FIELD_NAMES",
+    "FIELD_LABELS",
+    "FIELD_ICON_KEYS",
+    # Colors
+    "COLOR_CYAN",
+    "COLOR_GREEN",
+    "COLOR_BLUE",
+    "COLOR_MAGENTA",
+    "COLOR_YELLOW",
+    "COLOR_RED",
+    "COLOR_WHITE",
+    "VALID_COLORS",
+    "DEFAULT_COLORS",
+    # Config
+    "CONFIG_KEY_DISPLAY_MODE",
+    "CONFIG_KEY_VISIBLE_FIELDS",
+    "CONFIG_KEY_FIELD_ORDER",
+    "CONFIG_KEY_ICONS",
+    "CONFIG_KEY_COLORS",
+    "CONFIG_KEY_SHOW_PROGRESS_BARS",
+    "CONFIG_KEY_PROGRESS_BAR_WIDTH",
+    "CONFIG_KEY_ENABLE_COLORS",
+    "MIN_PROGRESS_BAR_WIDTH",
+    "MAX_PROGRESS_BAR_WIDTH",
+    "DEFAULT_PROGRESS_BAR_WIDTH",
+    "DEFAULT_SHOW_PROGRESS_BARS",
+    "DEFAULT_ENABLE_COLORS",
+    "DEFAULT_VISIBLE_FIELDS",
+    "DEFAULT_FIELD_ORDER",
+    # Display
+    "DISPLAY_MODE_COMPACT",
+    "DISPLAY_MODE_VERBOSE",
+    "VALID_DISPLAY_MODES",
+    "DEFAULT_DISPLAY_MODE",
+    "LINE_IDENTITY",
+    "LINE_STATUS",
+    "LINE_METRICS",
+    "FIELD_LINE_ASSIGNMENT",
+    "DEFAULT_ICONS",
+    "MILLISECONDS_PER_SECOND",
+    "SECONDS_PER_MINUTE",
+    "MINUTES_PER_HOUR",
+    "MILLISECONDS_PER_MINUTE",
+    "MILLISECONDS_PER_HOUR",
+    "GIT_COMMAND_TIMEOUT_SECONDS",
+    "GIT_HEAD_REF_PREFIX",
+    "GIT_DETACHED_HEAD_HASH_LENGTH",
+]

@@ -9,9 +9,9 @@ import json
 import logging
 import os
 from typing import Dict, Any
-from config_manager import load_config
-from display_formatter import format_compact, format_verbose
-from git_utils import get_git_branch
+from config_manager import ConfigManager, load_config
+from display_formatter import StatusLineFormatter, format_compact, format_verbose
+from data_extractor import DataExtractor, extract_data
 from exceptions import InvalidJSONError
 import colors
 
@@ -44,100 +44,87 @@ if sys.version_info < (3, 6):
     print(f"Current version: {sys.version}", file=sys.stderr)
     sys.exit(1)
 
-def extract_data(json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract relevant fields from Claude Code JSON input."""
-    data = {}
 
-    # Model ID (more specific than display_name)
-    if "model" in json_data:
-        if "id" in json_data["model"]:
-            data["model"] = json_data["model"]["id"]
-        elif "display_name" in json_data["model"]:
-            # Fallback to display_name if id not available
-            data["model"] = json_data["model"]["display_name"]
+class StatusLine:
+    """
+    Facade for statusline generation workflow.
 
-    # Version
-    if "version" in json_data:
-        data["version"] = json_data["version"]
+    This class provides a clean, testable API for generating statusline output
+    from Claude Code JSON data. It orchestrates the configuration, data extraction,
+    and formatting processes.
 
-    # Context window
-    if "context_window" in json_data:
-        cw = json_data["context_window"]
-        if "remaining_percentage" in cw:
-            data["context_remaining"] = int(cw["remaining_percentage"])
+    Attributes:
+        config_manager: Manages configuration loading and validation
+        data_extractor: Extracts data from Claude Code JSON
+        formatter: Formats the extracted data for display
+    """
 
-        # Total tokens
-        total_tokens = 0
-        if "total_input_tokens" in cw:
-            total_tokens += cw["total_input_tokens"]
-        if "total_output_tokens" in cw:
-            total_tokens += cw["total_output_tokens"]
+    def __init__(self, config_manager: ConfigManager = None):
+        """
+        Initialize the StatusLine facade.
 
-        if total_tokens > 0:
-            data["tokens"] = total_tokens
+        Args:
+            config_manager: Optional ConfigManager instance (uses default if None)
+        """
+        self.config_manager = config_manager or ConfigManager()
+        self.data_extractor = DataExtractor()
+        self.formatter = StatusLineFormatter()
 
-    # Workspace
-    if "workspace" in json_data and "current_dir" in json_data["workspace"]:
-        cwd = json_data["workspace"]["current_dir"]
-        data["current_dir"] = os.path.basename(cwd) or cwd
+    def generate(self, json_input: str) -> str:
+        """
+        Generate statusline from JSON input.
 
-        # Get git branch
-        git_branch = get_git_branch(cwd)
-        if git_branch:
-            data["git_branch"] = git_branch
+        This is the main entry point for programmatic use of the statusline generator.
 
-    # Cost
-    if "cost" in json_data:
-        cost_data = json_data["cost"]
-        if "total_cost_usd" in cost_data:
-            data["cost"] = cost_data["total_cost_usd"]
+        Args:
+            json_input: JSON string from Claude Code
 
-        if "total_duration_ms" in cost_data:
-            duration_ms = cost_data["total_duration_ms"]
-            data["duration"] = duration_ms
+        Returns:
+            Formatted statusline string
 
-            # Calculate cost per hour
-            if data.get("cost") and duration_ms > 0:
-                duration_hours = duration_ms / (1000 * 60 * 60)
-                data["cost_per_hour"] = data["cost"] / duration_hours if duration_hours > 0 else 0
-
-            # Calculate tokens per minute
-            if data.get("tokens") and duration_ms > 0:
-                duration_minutes = duration_ms / (1000 * 60)
-                data["tokens_per_minute"] = int(data["tokens"] / duration_minutes) if duration_minutes > 0 else 0
-
-        # Lines changed
-        lines_added = cost_data.get("total_lines_added", 0)
-        lines_removed = cost_data.get("total_lines_removed", 0)
-        if lines_added > 0 or lines_removed > 0:
-            data["lines_changed"] = lines_added + lines_removed
-
-    # Output style
-    if "output_style" in json_data and "name" in json_data["output_style"]:
-        data["output_style"] = json_data["output_style"]["name"]
-
-    return data
-
-def main() -> None:
-    """Main entry point for statusline script."""
-    # Configure logging first
-    _configure_logging()
-
-    try:
-        # Read JSON from stdin
-        logger.debug("Reading JSON from stdin")
-        input_data = sys.stdin.read()
-
+        Raises:
+            InvalidJSONError: If JSON input cannot be parsed
+            Exception: For other unexpected errors during generation
+        """
+        # Parse JSON
+        logger.debug("Parsing JSON input")
         try:
-            json_data = json.loads(input_data)
+            json_data = json.loads(json_input)
             logger.debug(f"Successfully parsed JSON with keys: {list(json_data.keys())}")
         except json.JSONDecodeError as e:
             raise InvalidJSONError(f"Failed to parse JSON input: {e}")
 
-        # Load user config
+        # Load configuration
         logger.debug("Loading configuration")
-        config = load_config()
+        config = self.config_manager.load()
 
+        # Configure colors based on config and environment
+        self._configure_colors(config)
+
+        # Extract data from JSON
+        logger.debug("Extracting data from JSON")
+        data = self.data_extractor.extract(json_data, config)
+        logger.debug(f"Extracted fields: {list(data.keys())}")
+
+        # Format output based on display mode
+        display_mode = config.get("display_mode", "compact")
+        logger.debug(f"Using display mode: {display_mode}")
+
+        verbose = self._is_verbose(display_mode)
+        output = self.formatter.format(data, config, verbose=verbose)
+
+        logger.debug("Statusline generation complete")
+        return output
+
+    def _configure_colors(self, config: Dict[str, Any]) -> None:
+        """
+        Configure color output based on config and environment.
+
+        Sets the colors module state to enable or disable colors.
+
+        Args:
+            config: Configuration dictionary
+        """
         # Set color state in colors module based on config and environment
         # Note: We modify the module state rather than environment to avoid side effects
         if not config.get("enable_colors", True):
@@ -149,23 +136,36 @@ def main() -> None:
         else:
             colors._color_override = None
 
-        # Extract data from JSON
-        logger.debug("Extracting data from JSON")
-        data = extract_data(json_data, config)
-        logger.debug(f"Extracted fields: {list(data.keys())}")
+    def _is_verbose(self, display_mode: str) -> bool:
+        """
+        Determine if verbose mode should be used.
 
-        # Format output based on display mode
-        display_mode = config.get("display_mode", "compact")
-        logger.debug(f"Using display mode: {display_mode}")
+        Args:
+            display_mode: Display mode from config
 
-        if display_mode in ["large", "verbose"]:  # Support both names for compatibility
-            output = format_verbose(data, config)
-        else:
-            output = format_compact(data, config)
+        Returns:
+            True if verbose mode should be used, False otherwise
+        """
+        # Support both "large" and "verbose" for compatibility
+        return display_mode in ["large", "verbose"]
+
+
+def main() -> None:
+    """Main entry point for statusline script."""
+    # Configure logging first
+    _configure_logging()
+
+    try:
+        # Read JSON from stdin
+        logger.debug("Reading JSON from stdin")
+        input_data = sys.stdin.read()
+
+        # Create StatusLine facade and generate output
+        statusline = StatusLine()
+        output = statusline.generate(input_data)
 
         # Output to stdout
         print(output)
-        logger.debug("Statusline output complete")
 
     except InvalidJSONError as e:
         logger.error(f"Invalid JSON: {e}")

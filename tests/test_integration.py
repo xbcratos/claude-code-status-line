@@ -365,8 +365,9 @@ class TestInstallationHelper:
             # Copy necessary files
             import shutil
             project_src = Path(__file__).parent.parent / "src"
-            for file in ["config_manager.py", "constants.py"]:
-                shutil.copy(project_src / file, src_dir / file)
+            shutil.copy(project_src / "config_manager.py", src_dir / "config_manager.py")
+            # Copy constants directory (it's now a package, not a single file)
+            shutil.copytree(project_src / "constants", src_dir / "constants")
 
             # Run create_default_config
             result = install_helper.create_default_config(str(src_dir))
