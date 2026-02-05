@@ -227,14 +227,17 @@ Formats statusline using StatusLineFormatter class and Field hierarchy.
 - v1.0.4: StatusLineFormatter class with field registry
 
 ### git_utils.py (Git Integration)
-Fast git branch detection with graceful fallback.
+Fast git branch detection with graceful fallback and GitHub PR status integration.
 
 **Key Functions:**
 - `get_git_branch(cwd: str) -> str`: Get current branch name
+- `get_git_status(cwd: str) -> str`: Get git status indicators (clean/dirty, ahead/behind)
+- `get_pr_status(cwd: str) -> str`: Get PR status with color-coded indicators (v1.2.3+)
 
 **Performance:**
 - Primary: Fast `.git/HEAD` file reading
 - Fallback: Git command with 0.5s timeout
+- PR status: GitHub CLI with 2.0s timeout for API calls
 
 **Type Hints:** Full type annotations
 

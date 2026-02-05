@@ -2,6 +2,11 @@
 
 set -e
 
+# Colors for output
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+NC='\033[0m' # No Color
+
 echo "Installing Claude Code Statusline Tool..."
 echo
 
@@ -11,12 +16,12 @@ PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d. -f1)
 PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d. -f2)
 
 if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 6 ]); then
-    echo "Error: Python 3.6 or higher is required"
-    echo "Current version: Python $PYTHON_VERSION"
+    echo -e "${RED}Error: Python 3.6 or higher is required${NC}"
+    echo -e "${RED}Current version: Python $PYTHON_VERSION${NC}"
     exit 1
 fi
 
-echo "✓ Python $PYTHON_VERSION detected"
+echo -e "${GREEN}✓ Python $PYTHON_VERSION detected${NC}"
 echo
 
 # Define paths
@@ -39,9 +44,9 @@ chmod +x "$INSTALL_DIR/configure.py"
 SYMLINK_DIR="/usr/local/bin"
 if [ -w "$SYMLINK_DIR" ]; then
     ln -sf "$INSTALL_DIR/configure.py" "$SYMLINK_DIR/claude-statusline-config"
-    echo "Created symlink: claude-statusline-config"
+    echo -e "${GREEN}Created symlink: claude-statusline-config${NC}"
 else
-    echo "Note: Could not create symlink in $SYMLINK_DIR (requires sudo)"
+    echo -e "${RED}Note: Could not create symlink in $SYMLINK_DIR (requires sudo)${NC}"
     echo "You can manually create it with:"
     echo "  sudo ln -sf $INSTALL_DIR/configure.py $SYMLINK_DIR/claude-statusline-config"
 fi
@@ -58,7 +63,7 @@ python3 "$(dirname "${BASH_SOURCE[0]}")/install_helper.py" update-settings "$CLA
 
 if [ $? -eq 0 ]; then
     echo
-    echo "Installation complete!"
+    echo -e "${GREEN}✓ Installation complete!${NC}"
     echo
     echo "Next steps:"
     echo "1. Run 'claude-statusline-config' to customize your statusline (or python3 $INSTALL_DIR/configure.py)"
@@ -67,7 +72,7 @@ if [ $? -eq 0 ]; then
     echo "Installation directory: $INSTALL_DIR"
 else
     echo
-    echo "Error: Failed to update settings file"
+    echo -e "${RED}Error: Failed to update settings file${NC}"
     echo "Please manually add the following to $CLAUDE_SETTINGS:"
     echo
     cat << 'EOF'

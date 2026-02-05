@@ -366,7 +366,8 @@ def get_git_branch(cwd: str) -> str:
 
 ```python
 # Git Settings
-GIT_COMMAND_TIMEOUT_SECONDS = 0.5
+GIT_COMMAND_TIMEOUT_SECONDS = 0.5  # For local git commands
+GH_COMMAND_TIMEOUT_SECONDS = 2.0   # For gh CLI API calls
 GIT_HEAD_REF_PREFIX = "ref: refs/heads/"
 GIT_DETACHED_HEAD_HASH_LENGTH = 7
 ```

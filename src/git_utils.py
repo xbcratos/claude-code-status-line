@@ -184,12 +184,13 @@ def get_pr_status(cwd: str) -> str:
     """
     try:
         # Check if gh CLI is available and we're in a GitHub repo
+        # Use longer timeout for gh command since it makes API calls
         result = subprocess.run(
             ['gh', 'pr', 'view', '--json', 'number,isDraft,reviewDecision,statusCheckRollup'],
             cwd=cwd,
             capture_output=True,
             text=True,
-            timeout=constants.GIT_COMMAND_TIMEOUT_SECONDS
+            timeout=constants.GH_COMMAND_TIMEOUT_SECONDS
         )
 
         if result.returncode != 0:

@@ -105,5 +105,6 @@ MILLISECONDS_PER_HOUR = MILLISECONDS_PER_MINUTE * MINUTES_PER_HOUR
 # ============================================================================
 
 GIT_COMMAND_TIMEOUT_SECONDS = 0.5
+GH_COMMAND_TIMEOUT_SECONDS = 2.0  # Longer timeout for gh API calls
 GIT_HEAD_REF_PREFIX = "ref: refs/heads/"
 GIT_DETACHED_HEAD_HASH_LENGTH = 7
