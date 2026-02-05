@@ -8,6 +8,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config_manager import load_config, save_config, get_default_config
 from display_formatter import format_compact, format_verbose
 import colors
+import constants
 
 # Require Python 3.6+
 if sys.version_info < (3, 6):
@@ -29,23 +30,23 @@ def show_menu(config):
     print()
 
     print(f"1. Display Mode")
-    print(f"   Current: {config['display_mode']}")
-    print(f"   Options: [compact, verbose]")
+    print(f"   Current: {config[constants.CONFIG_KEY_DISPLAY_MODE]}")
+    print(f"   Options: [{constants.DISPLAY_MODE_COMPACT}, {constants.DISPLAY_MODE_VERBOSE}]")
     print()
 
     print("2. Toggle Visible Fields")
-    visible = config["visible_fields"]
+    visible = config[constants.CONFIG_KEY_VISIBLE_FIELDS]
     field_names = {
-        "model": "Model Name",
-        "version": "Version",
-        "context_remaining": "Context Remaining",
-        "tokens": "Tokens",
-        "current_dir": "Current Directory",
-        "git_branch": "Git Branch",
-        "cost": "Cost",
-        "duration": "Duration",
-        "lines_changed": "Lines Changed",
-        "output_style": "Output Style"
+        constants.FIELD_MODEL: "Model Name",
+        constants.FIELD_VERSION: "Version",
+        constants.FIELD_CONTEXT_REMAINING: "Context Remaining",
+        constants.FIELD_TOKENS: "Tokens",
+        constants.FIELD_CURRENT_DIR: "Current Directory",
+        constants.FIELD_GIT_BRANCH: "Git Branch",
+        constants.FIELD_COST: "Cost",
+        constants.FIELD_DURATION: "Duration",
+        constants.FIELD_LINES_CHANGED: "Lines Changed",
+        constants.FIELD_OUTPUT_STYLE: "Output Style"
     }
     for field, label in field_names.items():
         status = "✓" if visible.get(field, False) else "✗"
@@ -55,8 +56,8 @@ def show_menu(config):
     print("3. Customize Icons")
     print("4. Customize Colors")
     print("5. Reorder Fields")
-    print(f"6. Progress Bar Settings (Currently: {'On' if config['show_progress_bars'] else 'Off'}, Width: {config['progress_bar_width']})")
-    print(f"7. Toggle Colors On/Off (Currently: {'On' if config['enable_colors'] else 'Off'})")
+    print(f"6. Progress Bar Settings (Currently: {'On' if config[constants.CONFIG_KEY_SHOW_PROGRESS_BARS] else 'Off'}, Width: {config[constants.CONFIG_KEY_PROGRESS_BAR_WIDTH]})")
+    print(f"7. Toggle Colors On/Off (Currently: {'On' if config[constants.CONFIG_KEY_ENABLE_COLORS] else 'Off'})")
     print("8. Reset to Defaults")
     print("9. Preview Statusline")
     print("10. Save and Exit")
@@ -71,18 +72,18 @@ def toggle_fields_menu(config):
     print("=" * 50)
     print()
 
-    visible = config["visible_fields"]
+    visible = config[constants.CONFIG_KEY_VISIBLE_FIELDS]
     field_names = {
-        "1": ("model", "Model Name"),
-        "2": ("version", "Version"),
-        "3": ("context_remaining", "Context Remaining"),
-        "4": ("tokens", "Tokens"),
-        "5": ("current_dir", "Current Directory"),
-        "6": ("git_branch", "Git Branch"),
-        "7": ("cost", "Cost"),
-        "8": ("duration", "Duration"),
-        "9": ("lines_changed", "Lines Changed"),
-        "10": ("output_style", "Output Style")
+        "1": (constants.FIELD_MODEL, "Model Name"),
+        "2": (constants.FIELD_VERSION, "Version"),
+        "3": (constants.FIELD_CONTEXT_REMAINING, "Context Remaining"),
+        "4": (constants.FIELD_TOKENS, "Tokens"),
+        "5": (constants.FIELD_CURRENT_DIR, "Current Directory"),
+        "6": (constants.FIELD_GIT_BRANCH, "Git Branch"),
+        "7": (constants.FIELD_COST, "Cost"),
+        "8": (constants.FIELD_DURATION, "Duration"),
+        "9": (constants.FIELD_LINES_CHANGED, "Lines Changed"),
+        "10": (constants.FIELD_OUTPUT_STYLE, "Output Style")
     }
 
     for num, (field, label) in field_names.items():
@@ -109,17 +110,17 @@ def customize_icons_menu(config):
     print("=" * 50)
     print()
 
-    icons = config["icons"]
+    icons = config[constants.CONFIG_KEY_ICONS]
     icon_names = {
-        "1": ("directory", "Directory"),
-        "2": ("git_branch", "Git Branch"),
-        "3": ("model", "Model"),
-        "4": ("version", "Version"),
-        "5": ("context", "Context"),
-        "6": ("cost", "Cost"),
-        "7": ("tokens", "Tokens"),
-        "8": ("duration", "Duration"),
-        "9": ("style", "Style")
+        "1": (constants.ICON_KEY_DIRECTORY, "Directory"),
+        "2": (constants.ICON_KEY_GIT_BRANCH, "Git Branch"),
+        "3": (constants.ICON_KEY_MODEL, "Model"),
+        "4": (constants.ICON_KEY_VERSION, "Version"),
+        "5": (constants.ICON_KEY_CONTEXT, "Context"),
+        "6": (constants.ICON_KEY_COST, "Cost"),
+        "7": (constants.ICON_KEY_TOKENS, "Tokens"),
+        "8": (constants.ICON_KEY_DURATION, "Duration"),
+        "9": (constants.ICON_KEY_STYLE, "Style")
     }
 
     for num, (field, label) in icon_names.items():
@@ -148,28 +149,29 @@ def customize_colors_menu(config):
     print()
 
     color_fields = {
-        "1": ("directory", "Directory"),
-        "2": ("git_branch", "Git Branch"),
-        "3": ("model", "Model"),
-        "4": ("version", "Version"),
-        "5": ("context", "Context"),
-        "6": ("cost", "Cost"),
-        "7": ("tokens", "Tokens"),
-        "8": ("duration", "Duration"),
-        "9": ("style", "Style"),
+        "1": (constants.ICON_KEY_DIRECTORY, "Directory"),
+        "2": (constants.ICON_KEY_GIT_BRANCH, "Git Branch"),
+        "3": (constants.ICON_KEY_MODEL, "Model"),
+        "4": (constants.ICON_KEY_VERSION, "Version"),
+        "5": (constants.ICON_KEY_CONTEXT, "Context"),
+        "6": (constants.ICON_KEY_COST, "Cost"),
+        "7": (constants.ICON_KEY_TOKENS, "Tokens"),
+        "8": (constants.ICON_KEY_DURATION, "Duration"),
+        "9": (constants.ICON_KEY_STYLE, "Style"),
         "10": ("progress_bar_filled", "Progress Bar (Filled)"),
         "11": ("progress_bar_empty", "Progress Bar (Empty)"),
         "12": ("separator", "Separator")
     }
 
-    color_config = config["colors"]
+    color_config = config[constants.CONFIG_KEY_COLORS]
 
     for num, (field, label) in color_fields.items():
-        current = color_config.get(field, "white")
+        current = color_config.get(field, constants.COLOR_WHITE)
         print(f"{num}. {label}: {current}")
 
     print()
-    print("Available colors: cyan, green, blue, magenta, yellow, red, white")
+    colors_list = ", ".join(constants.VALID_COLORS)
+    print(f"Available colors: {colors_list}")
     print()
     print("0. Back to main menu")
     print()
@@ -178,11 +180,10 @@ def customize_colors_menu(config):
 
     if choice in color_fields:
         field, label = color_fields[choice]
-        print(f"\nAvailable colors: cyan, green, blue, magenta, yellow, red, white")
+        print(f"\nAvailable colors: {colors_list}")
         new_color = input(f"Enter new color for {label}: ").strip().lower()
 
-        valid_colors = ["cyan", "green", "blue", "magenta", "yellow", "red", "white"]
-        if new_color in valid_colors:
+        if new_color in constants.VALID_COLORS:
             color_config[field] = new_color
         else:
             print(f"Invalid color. Keeping current color: {color_config[field]}")
@@ -200,19 +201,19 @@ def reorder_fields_menu(config):
     print("Current order:")
 
     field_names = {
-        "current_dir": "Current Directory",
-        "git_branch": "Git Branch",
-        "model": "Model",
-        "version": "Version",
-        "context_remaining": "Context Remaining",
-        "tokens": "Tokens",
-        "cost": "Cost",
-        "duration": "Duration",
-        "lines_changed": "Lines Changed",
-        "output_style": "Output Style"
+        constants.FIELD_CURRENT_DIR: "Current Directory",
+        constants.FIELD_GIT_BRANCH: "Git Branch",
+        constants.FIELD_MODEL: "Model",
+        constants.FIELD_VERSION: "Version",
+        constants.FIELD_CONTEXT_REMAINING: "Context Remaining",
+        constants.FIELD_TOKENS: "Tokens",
+        constants.FIELD_COST: "Cost",
+        constants.FIELD_DURATION: "Duration",
+        constants.FIELD_LINES_CHANGED: "Lines Changed",
+        constants.FIELD_OUTPUT_STYLE: "Output Style"
     }
 
-    for i, field in enumerate(config["field_order"], 1):
+    for i, field in enumerate(config[constants.CONFIG_KEY_FIELD_ORDER], 1):
         label = field_names.get(field, field)
         print(f"{i}. {label}")
 
@@ -230,9 +231,10 @@ def reorder_fields_menu(config):
                 idx1 = int(parts[0]) - 1
                 idx2 = int(parts[1]) - 1
 
-                if 0 <= idx1 < len(config["field_order"]) and 0 <= idx2 < len(config["field_order"]):
-                    config["field_order"][idx1], config["field_order"][idx2] = \
-                        config["field_order"][idx2], config["field_order"][idx1]
+                field_order = config[constants.CONFIG_KEY_FIELD_ORDER]
+                if 0 <= idx1 < len(field_order) and 0 <= idx2 < len(field_order):
+                    field_order[idx1], field_order[idx2] = \
+                        field_order[idx2], field_order[idx1]
                 else:
                     print("Invalid positions")
                     input("Press Enter to continue...")
@@ -249,8 +251,8 @@ def progress_bar_settings_menu(config):
     print("Progress Bar Settings")
     print("=" * 50)
     print()
-    print(f"1. Toggle Progress Bars (Currently: {'On' if config['show_progress_bars'] else 'Off'})")
-    print(f"2. Set Width (Currently: {config['progress_bar_width']})")
+    print(f"1. Toggle Progress Bars (Currently: {'On' if config[constants.CONFIG_KEY_SHOW_PROGRESS_BARS] else 'Off'})")
+    print(f"2. Set Width (Currently: {config[constants.CONFIG_KEY_PROGRESS_BAR_WIDTH]})")
     print()
     print("0. Back to main menu")
     print()
@@ -258,15 +260,15 @@ def progress_bar_settings_menu(config):
     choice = input("Choice: ").strip()
 
     if choice == "1":
-        config["show_progress_bars"] = not config["show_progress_bars"]
+        config[constants.CONFIG_KEY_SHOW_PROGRESS_BARS] = not config[constants.CONFIG_KEY_SHOW_PROGRESS_BARS]
         return True
     elif choice == "2":
         try:
-            width = int(input("Enter new width (5-50): ").strip())
-            if 5 <= width <= 50:
-                config["progress_bar_width"] = width
+            width = int(input(f"Enter new width ({constants.MIN_PROGRESS_BAR_WIDTH}-{constants.MAX_PROGRESS_BAR_WIDTH}): ").strip())
+            if constants.MIN_PROGRESS_BAR_WIDTH <= width <= constants.MAX_PROGRESS_BAR_WIDTH:
+                config[constants.CONFIG_KEY_PROGRESS_BAR_WIDTH] = width
             else:
-                print("Width must be between 5 and 50")
+                print(f"Width must be between {constants.MIN_PROGRESS_BAR_WIDTH} and {constants.MAX_PROGRESS_BAR_WIDTH}")
                 input("Press Enter to continue...")
         except ValueError:
             print("Invalid input")
@@ -284,18 +286,18 @@ def preview_statusline(config):
 
     # Mock data
     mock_data = {
-        "model": "claude-sonnet-4-5-20250929",
-        "version": "v1.0.85",
-        "context_remaining": 83,
-        "tokens": 14638846,
-        "current_dir": "claude-code-statusline",
-        "git_branch": "main",
-        "cost": 49.00,
-        "cost_per_hour": 16.55,
-        "tokens_per_minute": 279900,
-        "duration": 11220000,
-        "lines_changed": 450,
-        "output_style": "default"
+        constants.FIELD_MODEL: "claude-sonnet-4-5-20250929",
+        constants.FIELD_VERSION: "v1.0.85",
+        constants.FIELD_CONTEXT_REMAINING: 83,
+        constants.FIELD_TOKENS: 14638846,
+        constants.FIELD_CURRENT_DIR: "claude-code-statusline",
+        constants.FIELD_GIT_BRANCH: "main",
+        constants.FIELD_COST: 49.00,
+        constants.FIELD_COST_PER_HOUR: 16.55,
+        constants.FIELD_TOKENS_PER_MINUTE: 279900,
+        constants.FIELD_DURATION: 11220000,
+        constants.FIELD_LINES_CHANGED: 450,
+        constants.FIELD_OUTPUT_STYLE: "default"
     }
 
     print("Compact Mode:")
@@ -316,10 +318,10 @@ def display_mode_menu(config):
     print("Display Mode")
     print("=" * 50)
     print()
-    print(f"Current: {config['display_mode']}")
+    print(f"Current: {config[constants.CONFIG_KEY_DISPLAY_MODE]}")
     print()
-    print("1. Compact - Icons and values only")
-    print("2. Verbose - Labeled fields with descriptions")
+    print(f"1. {constants.DISPLAY_MODE_COMPACT.capitalize()} - Icons and values only")
+    print(f"2. {constants.DISPLAY_MODE_VERBOSE.capitalize()} - Labeled fields with descriptions")
     print()
     print("0. Back to main menu")
     print()
@@ -327,9 +329,9 @@ def display_mode_menu(config):
     choice = input("Choice: ").strip()
 
     if choice == "1":
-        config["display_mode"] = "compact"
+        config[constants.CONFIG_KEY_DISPLAY_MODE] = constants.DISPLAY_MODE_COMPACT
     elif choice == "2":
-        config["display_mode"] = "verbose"
+        config[constants.CONFIG_KEY_DISPLAY_MODE] = constants.DISPLAY_MODE_VERBOSE
 
     return choice in ["1", "2"]
 
@@ -359,7 +361,7 @@ def main():
             while progress_bar_settings_menu(config):
                 pass
         elif choice == "7":
-            config["enable_colors"] = not config.get("enable_colors", True)
+            config[constants.CONFIG_KEY_ENABLE_COLORS] = not config.get(constants.CONFIG_KEY_ENABLE_COLORS, constants.DEFAULT_ENABLE_COLORS)
         elif choice == "8":
             confirm = input("Reset to defaults? (y/n): ").strip().lower()
             if confirm == "y":

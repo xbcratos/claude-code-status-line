@@ -252,6 +252,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - All 154 tests continue to pass
 - Codebase functionality identical to v1.1.0
 
+## [1.1.2] - 2026-02-05
+
+### Changed
+- **configure.py Refactoring**: Replaced all hardcoded strings with constants
+  - Field names now use `FIELD_*` constants (e.g., `FIELD_MODEL`, `FIELD_VERSION`)
+  - Icon keys now use `ICON_KEY_*` constants (e.g., `ICON_KEY_DIRECTORY`, `ICON_KEY_GIT_BRANCH`)
+  - Display modes now use `DISPLAY_MODE_COMPACT` and `DISPLAY_MODE_VERBOSE`
+  - Config keys now use `CONFIG_KEY_*` constants (e.g., `CONFIG_KEY_DISPLAY_MODE`, `CONFIG_KEY_VISIBLE_FIELDS`)
+  - Color validation now uses `VALID_COLORS` constant list
+  - Progress bar width limits now use `MIN_PROGRESS_BAR_WIDTH` and `MAX_PROGRESS_BAR_WIDTH`
+  - Default values now use constants (e.g., `DEFAULT_ENABLE_COLORS`)
+
+### Technical Improvements
+- Improved maintainability by eliminating magic strings throughout configure.py
+- Better consistency with the rest of the codebase
+- Easier to refactor field names or config keys in the future (single source of truth)
+- Reduced risk of typos in field/config key names
+
+### Notes
+- No functional changes, only code quality improvements
+- All 154 tests continue to pass
+- Configuration file format remains unchanged
+
 ## [Unreleased]
 
 ### Possible Future Enhancements
