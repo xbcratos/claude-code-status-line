@@ -253,3 +253,26 @@ MIT License - feel free to modify and distribute as needed.
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
+
+<div align="center">
+
+## 🌟 Show Your Support
+
+Give a ⭐ if this project helped you!
+
+[![GitHub stars](https://img.shields.io/github/stars/xbcratos/claude-code-status-line?style=social)](https://github.com/xbcratos/claude-code-status-line/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/xbcratos/claude-code-status-line?style=social)](https://github.com/xbcratos/claude-code-status-line/network/members)
+[![GitHub watchers](https://img.shields.io/github/watchers/xbcratos/claude-code-status-line?style=social)](https://github.com/xbcratos/claude-code-status-line/watchers)
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/xbcratos/claude-code-status-line/blob/main/LICENSE)
+[![Python 3.6+](https://img.shields.io/badge/Python-3.6+-blue.svg)](https://www.python.org/downloads/)
+
+[![Issues](https://img.shields.io/github/issues/xbcratos/claude-code-status-line)](https://github.com/xbcratos/claude-code-status-line/issues)
+[![Pull Requests](https://img.shields.io/github/issues-pr/xbcratos/claude-code-status-line)](https://github.com/xbcratos/claude-code-status-line/pulls)
+[![Contributors](https://img.shields.io/github/contributors/xbcratos/claude-code-status-line)](https://github.com/xbcratos/claude-code-status-line/graphs/contributors)
+
+### 💬 Connect
+
+[Report Bug](https://github.com/xbcratos/claude-code-status-line/issues) · [Request Feature](https://github.com/xbcratos/claude-code-status-line/issues) · [Discussions](https://github.com/xbcratos/claude-code-status-line/discussions)
+
+</div>
