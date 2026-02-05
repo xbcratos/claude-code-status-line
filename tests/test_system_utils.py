@@ -91,39 +91,39 @@ def test_get_cpu_usage_error_handling(mock_cpu_linux, mock_platform):
 @patch('system_utils.platform.system')
 @patch('system_utils._get_memory_linux')
 def test_get_memory_usage_linux(mock_memory_linux, mock_platform):
-    """Test get_memory_usage on Linux."""
+    """Test get_memory_usage on Linux returns percentage."""
     mock_platform.return_value = 'Linux'
-    mock_memory_linux.return_value = '8.5GB'
+    mock_memory_linux.return_value = '65%'
 
     result = get_memory_usage()
 
-    assert result == '8.5GB'
+    assert result == '65%'
     mock_memory_linux.assert_called_once()
 
 
 @patch('system_utils.platform.system')
 @patch('system_utils._get_memory_macos')
 def test_get_memory_usage_macos(mock_memory_macos, mock_platform):
-    """Test get_memory_usage on macOS."""
+    """Test get_memory_usage on macOS returns percentage."""
     mock_platform.return_value = 'Darwin'
-    mock_memory_macos.return_value = '12.3GB'
+    mock_memory_macos.return_value = '70%'
 
     result = get_memory_usage()
 
-    assert result == '12.3GB'
+    assert result == '70%'
     mock_memory_macos.assert_called_once()
 
 
 @patch('system_utils.platform.system')
 @patch('system_utils._get_memory_windows')
 def test_get_memory_usage_windows(mock_memory_windows, mock_platform):
-    """Test get_memory_usage on Windows."""
+    """Test get_memory_usage on Windows returns percentage."""
     mock_platform.return_value = 'Windows'
-    mock_memory_windows.return_value = '16.0GB'
+    mock_memory_windows.return_value = '75%'
 
     result = get_memory_usage()
 
-    assert result == '16.0GB'
+    assert result == '75%'
     mock_memory_windows.assert_called_once()
 
 
@@ -283,7 +283,7 @@ def test_read_proc_stat_io_error():
 
 
 def test_get_memory_linux_success():
-    """Test _get_memory_linux with valid data."""
+    """Test _get_memory_linux with valid data returns percentage."""
     meminfo_content = """MemTotal:       16384000 kB
 MemFree:         4096000 kB
 MemAvailable:    8192000 kB
@@ -292,12 +292,13 @@ MemAvailable:    8192000 kB
     with patch('builtins.open', mock_open(read_data=meminfo_content)):
         result = _get_memory_linux()
 
-    # mem_used = (16384000 - 8192000) / (1024 * 1024) = 7.8GB
-    assert 'GB' in result
+    # mem_used = (16384000 - 8192000) / 16384000 = 50%
+    assert '%' in result
+    assert result == '50%'
 
 
 def test_get_memory_linux_small_memory():
-    """Test _get_memory_linux with small memory usage."""
+    """Test _get_memory_linux with small memory usage returns percentage."""
     meminfo_content = """MemTotal:       1048576 kB
 MemFree:         524288 kB
 MemAvailable:    786432 kB
@@ -306,8 +307,9 @@ MemAvailable:    786432 kB
     with patch('builtins.open', mock_open(read_data=meminfo_content)):
         result = _get_memory_linux()
 
-    # mem_used = (1048576 - 786432) / 1024 = 256MB
-    assert 'MB' in result
+    # mem_used = (1048576 - 786432) / 1048576 = 25%
+    assert '%' in result
+    assert result == '25%'
 
 
 def test_get_memory_linux_zero_total():
@@ -487,7 +489,7 @@ def test_get_cpu_windows_subprocess_error(mock_run):
 
 @patch('subprocess.run')
 def test_get_memory_windows_success(mock_run):
-    """Test _get_memory_windows with valid output."""
+    """Test _get_memory_windows with valid output returns percentage."""
     # Mock two separate subprocess calls
     mock_result_total = MagicMock()
     mock_result_total.returncode = 0
@@ -501,8 +503,8 @@ def test_get_memory_windows_success(mock_run):
 
     result = _get_memory_windows()
 
-    # (17179869184 - 4194304*1024) / (1024^3) = 12GB
-    assert 'GB' in result
+    # used = (17179869184 - 4194304*1024) / 17179869184 ≈ 75%
+    assert '%' in result
 
 
 @patch('subprocess.run')

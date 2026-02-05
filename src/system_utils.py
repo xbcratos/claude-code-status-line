@@ -35,10 +35,10 @@ def get_cpu_usage() -> str:
 
 def get_memory_usage() -> str:
     """
-    Get current memory usage.
+    Get current memory usage as percentage.
 
     Returns:
-        Memory usage string (e.g., "8.5GB" or "65%") or empty string if unavailable
+        Memory usage percentage (e.g., "65%") or empty string if unavailable
     """
     system = platform.system()
 
@@ -125,7 +125,7 @@ def _read_proc_stat() -> Optional[dict]:
 
 
 def _get_memory_linux() -> str:
-    """Get memory usage on Linux by reading /proc/meminfo."""
+    """Get memory usage percentage on Linux by reading /proc/meminfo."""
     try:
         meminfo = {}
         with open('/proc/meminfo', 'r') as f:
@@ -143,12 +143,9 @@ def _get_memory_linux() -> str:
             return ""
 
         mem_used_kb = mem_total - mem_available
-        mem_used_gb = mem_used_kb / (1024 * 1024)
+        mem_percentage = (mem_used_kb / mem_total) * 100
 
-        if mem_used_gb < 1:
-            return f"{mem_used_kb / 1024:.0f}MB"
-        else:
-            return f"{mem_used_gb:.1f}GB"
+        return f"{mem_percentage:.0f}%"
     except (IOError, ValueError, KeyError):
         return ""
 
@@ -207,8 +204,21 @@ def _get_cpu_macos() -> str:
 
 
 def _get_memory_macos() -> str:
-    """Get memory usage on macOS using vm_stat command."""
+    """Get memory usage percentage on macOS using vm_stat and sysctl."""
     try:
+        # Get total physical memory
+        sysctl_result = subprocess.run(
+            ['sysctl', '-n', 'hw.memsize'],
+            capture_output=True,
+            text=True,
+            timeout=1.0
+        )
+        if sysctl_result.returncode != 0:
+            return ""
+
+        total_memory_bytes = int(sysctl_result.stdout.strip())
+
+        # Get memory usage from vm_stat
         result = subprocess.run(
             ['vm_stat'],
             capture_output=True,
@@ -222,11 +232,13 @@ def _get_memory_macos() -> str:
 
             for line in result.stdout.split('\n'):
                 if 'page size' in line:
-                    # Extract page size
+                    # Extract page size from format: "(page size of 16384 bytes)"
                     parts = line.split()
-                    if len(parts) >= 3:
-                        page_size = int(parts[2])
-                elif 'Pages active' in line or 'Pages wired' in line:
+                    for i, part in enumerate(parts):
+                        if part == 'of' and i + 1 < len(parts):
+                            page_size = int(parts[i + 1])
+                            break
+                elif 'Pages active' in line or 'Pages wired down' in line:
                     # Count active and wired pages as used
                     parts = line.split()
                     if len(parts) >= 2:
@@ -234,12 +246,9 @@ def _get_memory_macos() -> str:
                         mem_used_pages += pages
 
             mem_used_bytes = mem_used_pages * page_size
-            mem_used_gb = mem_used_bytes / (1024 ** 3)
+            mem_percentage = (mem_used_bytes / total_memory_bytes) * 100
 
-            if mem_used_gb < 1:
-                return f"{mem_used_bytes / (1024 ** 2):.0f}MB"
-            else:
-                return f"{mem_used_gb:.1f}GB"
+            return f"{mem_percentage:.0f}%"
     except (subprocess.SubprocessError, ValueError, IndexError):
         pass
 
@@ -296,7 +305,7 @@ def _get_cpu_windows() -> str:
 
 
 def _get_memory_windows() -> str:
-    """Get memory usage on Windows using wmic command."""
+    """Get memory usage percentage on Windows using wmic command."""
     try:
         # Get total physical memory
         result_total = subprocess.run(
@@ -323,12 +332,9 @@ def _get_memory_windows() -> str:
                 free_bytes = free_kb * 1024
 
                 used_bytes = total_bytes - free_bytes
-                used_gb = used_bytes / (1024 ** 3)
+                mem_percentage = (used_bytes / total_bytes) * 100
 
-                if used_gb < 1:
-                    return f"{used_bytes / (1024 ** 2):.0f}MB"
-                else:
-                    return f"{used_gb:.1f}GB"
+                return f"{mem_percentage:.0f}%"
     except (subprocess.SubprocessError, ValueError, FileNotFoundError):
         pass
 

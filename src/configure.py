@@ -22,6 +22,29 @@ def clear_screen():
     # Use os.system to clear screen portably
     os.system('cls' if os.name == 'nt' else 'clear')
 
+def _get_field_display_name(field_name):
+    """Get user-friendly display name for a field."""
+    # Map field names to display names, using FIELD_LABELS as base
+    display_names = {
+        constants.FIELD_CURRENT_DIR: "Current Directory",
+        constants.FIELD_GIT_BRANCH: "Git Branch",
+        constants.FIELD_MODEL: "Model Name",
+        constants.FIELD_VERSION: "Version",
+        constants.FIELD_OUTPUT_STYLE: "Output Style",
+        constants.FIELD_CONTEXT_REMAINING: "Context Remaining",
+        constants.FIELD_DURATION: "Duration",
+        constants.FIELD_COST: "Cost",
+        constants.FIELD_TOKENS: "Tokens",
+        constants.FIELD_LINES_CHANGED: "Lines Changed",
+        constants.FIELD_CPU_USAGE: "CPU Usage",
+        constants.FIELD_MEMORY_USAGE: "Memory Usage",
+        constants.FIELD_BATTERY: "Battery",
+        constants.FIELD_PYTHON_VERSION: "Python Version",
+        constants.FIELD_PYTHON_VENV: "Python Venv",
+        constants.FIELD_DATETIME: "Date/Time",
+    }
+    return display_names.get(field_name, field_name.replace('_', ' ').title())
+
 def show_menu(config):
     """Display main configuration menu."""
     clear_screen()
@@ -36,20 +59,10 @@ def show_menu(config):
 
     print("2. Toggle Visible Fields")
     visible = config[constants.CONFIG_KEY_VISIBLE_FIELDS]
-    field_names = {
-        constants.FIELD_MODEL: "Model Name",
-        constants.FIELD_VERSION: "Version",
-        constants.FIELD_CONTEXT_REMAINING: "Context Remaining",
-        constants.FIELD_TOKENS: "Tokens",
-        constants.FIELD_CURRENT_DIR: "Current Directory",
-        constants.FIELD_GIT_BRANCH: "Git Branch",
-        constants.FIELD_COST: "Cost",
-        constants.FIELD_DURATION: "Duration",
-        constants.FIELD_LINES_CHANGED: "Lines Changed",
-        constants.FIELD_OUTPUT_STYLE: "Output Style"
-    }
-    for field, label in field_names.items():
+    # Use VALID_FIELD_NAMES to dynamically show all fields
+    for field in constants.VALID_FIELD_NAMES:
         status = "✓" if visible.get(field, False) else "✗"
+        label = _get_field_display_name(field)
         print(f"   {status} {label}")
     print()
 
@@ -73,22 +86,14 @@ def toggle_fields_menu(config):
     print()
 
     visible = config[constants.CONFIG_KEY_VISIBLE_FIELDS]
-    field_names = {
-        "1": (constants.FIELD_MODEL, "Model Name"),
-        "2": (constants.FIELD_VERSION, "Version"),
-        "3": (constants.FIELD_CONTEXT_REMAINING, "Context Remaining"),
-        "4": (constants.FIELD_TOKENS, "Tokens"),
-        "5": (constants.FIELD_CURRENT_DIR, "Current Directory"),
-        "6": (constants.FIELD_GIT_BRANCH, "Git Branch"),
-        "7": (constants.FIELD_COST, "Cost"),
-        "8": (constants.FIELD_DURATION, "Duration"),
-        "9": (constants.FIELD_LINES_CHANGED, "Lines Changed"),
-        "10": (constants.FIELD_OUTPUT_STYLE, "Output Style")
-    }
 
-    for num, (field, label) in field_names.items():
+    # Dynamically build field menu from VALID_FIELD_NAMES
+    field_list = []
+    for i, field in enumerate(constants.VALID_FIELD_NAMES, 1):
+        label = _get_field_display_name(field)
+        field_list.append((str(i), field, label))
         status = "✓" if visible.get(field, False) else "✗"
-        print(f"{num}. {status} {label}")
+        print(f"{i}. {status} {label}")
 
     print()
     print("0. Back to main menu")
@@ -96,12 +101,34 @@ def toggle_fields_menu(config):
 
     choice = input("Toggle field (enter number): ").strip()
 
-    if choice in field_names:
-        field, _ = field_names[choice]
-        visible[field] = not visible.get(field, False)
-        return True
+    # Check if choice matches a field number
+    for num, field, _ in field_list:
+        if choice == num:
+            visible[field] = not visible.get(field, False)
+            return True
 
     return choice != "0"
+
+def _get_icon_display_name(icon_key):
+    """Get user-friendly display name for an icon key."""
+    display_names = {
+        constants.ICON_KEY_DIRECTORY: "Directory",
+        constants.ICON_KEY_GIT_BRANCH: "Git Branch",
+        constants.ICON_KEY_MODEL: "Model",
+        constants.ICON_KEY_VERSION: "Version",
+        constants.ICON_KEY_CONTEXT: "Context",
+        constants.ICON_KEY_COST: "Cost",
+        constants.ICON_KEY_TOKENS: "Tokens",
+        constants.ICON_KEY_DURATION: "Duration",
+        constants.ICON_KEY_STYLE: "Style",
+        constants.ICON_KEY_CPU: "CPU",
+        constants.ICON_KEY_MEMORY: "Memory",
+        constants.ICON_KEY_BATTERY: "Battery",
+        constants.ICON_KEY_PYTHON: "Python",
+        constants.ICON_KEY_DATETIME: "Date/Time",
+        constants.ICON_KEY_LINES_CHANGED: "Lines Changed",
+    }
+    return display_names.get(icon_key, icon_key.replace('_', ' ').title())
 
 def customize_icons_menu(config):
     """Menu for customizing icons."""
@@ -111,21 +138,14 @@ def customize_icons_menu(config):
     print()
 
     icons = config[constants.CONFIG_KEY_ICONS]
-    icon_names = {
-        "1": (constants.ICON_KEY_DIRECTORY, "Directory"),
-        "2": (constants.ICON_KEY_GIT_BRANCH, "Git Branch"),
-        "3": (constants.ICON_KEY_MODEL, "Model"),
-        "4": (constants.ICON_KEY_VERSION, "Version"),
-        "5": (constants.ICON_KEY_CONTEXT, "Context"),
-        "6": (constants.ICON_KEY_COST, "Cost"),
-        "7": (constants.ICON_KEY_TOKENS, "Tokens"),
-        "8": (constants.ICON_KEY_DURATION, "Duration"),
-        "9": (constants.ICON_KEY_STYLE, "Style")
-    }
 
-    for num, (field, label) in icon_names.items():
-        current = icons.get(field, "")
-        print(f"{num}. {label}: {current}")
+    # Dynamically build icon menu from DEFAULT_ICONS
+    icon_list = []
+    for i, icon_key in enumerate(sorted(constants.DEFAULT_ICONS.keys()), 1):
+        label = _get_icon_display_name(icon_key)
+        icon_list.append((str(i), icon_key, label))
+        current = icons.get(icon_key, "")
+        print(f"{i}. {label}: {current}")
 
     print()
     print("0. Back to main menu")
@@ -133,11 +153,12 @@ def customize_icons_menu(config):
 
     choice = input("Select field to change icon (enter number): ").strip()
 
-    if choice in icon_names:
-        field, label = icon_names[choice]
-        new_icon = input(f"Enter new icon for {label} (or press Enter to remove): ").strip()
-        icons[field] = new_icon
-        return True
+    # Check if choice matches an icon number
+    for num, icon_key, label in icon_list:
+        if choice == num:
+            new_icon = input(f"Enter new icon for {label} (or press Enter to remove): ").strip()
+            icons[icon_key] = new_icon
+            return True
 
     return choice != "0"
 
@@ -148,26 +169,24 @@ def customize_colors_menu(config):
     print("=" * 50)
     print()
 
-    color_fields = {
-        "1": (constants.ICON_KEY_DIRECTORY, "Directory"),
-        "2": (constants.ICON_KEY_GIT_BRANCH, "Git Branch"),
-        "3": (constants.ICON_KEY_MODEL, "Model"),
-        "4": (constants.ICON_KEY_VERSION, "Version"),
-        "5": (constants.ICON_KEY_CONTEXT, "Context"),
-        "6": (constants.ICON_KEY_COST, "Cost"),
-        "7": (constants.ICON_KEY_TOKENS, "Tokens"),
-        "8": (constants.ICON_KEY_DURATION, "Duration"),
-        "9": (constants.ICON_KEY_STYLE, "Style"),
-        "10": ("progress_bar_filled", "Progress Bar (Filled)"),
-        "11": ("progress_bar_empty", "Progress Bar (Empty)"),
-        "12": ("separator", "Separator")
-    }
-
     color_config = config[constants.CONFIG_KEY_COLORS]
 
-    for num, (field, label) in color_fields.items():
-        current = color_config.get(field, constants.COLOR_WHITE)
-        print(f"{num}. {label}: {current}")
+    # Dynamically build color menu from DEFAULT_COLORS
+    color_list = []
+    for i, color_key in enumerate(sorted(constants.DEFAULT_COLORS.keys()), 1):
+        # Get display name (reuse icon display name for icon keys, special handling for others)
+        if color_key == "progress_bar_filled":
+            label = "Progress Bar (Filled)"
+        elif color_key == "progress_bar_empty":
+            label = "Progress Bar (Empty)"
+        elif color_key == "separator":
+            label = "Separator"
+        else:
+            label = _get_icon_display_name(color_key)
+
+        color_list.append((str(i), color_key, label))
+        current = color_config.get(color_key, constants.COLOR_WHITE)
+        print(f"{i}. {label}: {current}")
 
     print()
     colors_list = ", ".join(constants.VALID_COLORS)
@@ -178,17 +197,18 @@ def customize_colors_menu(config):
 
     choice = input("Select field to change color (enter number): ").strip()
 
-    if choice in color_fields:
-        field, label = color_fields[choice]
-        print(f"\nAvailable colors: {colors_list}")
-        new_color = input(f"Enter new color for {label}: ").strip().lower()
+    # Check if choice matches a color number
+    for num, color_key, label in color_list:
+        if choice == num:
+            print(f"\nAvailable colors: {colors_list}")
+            new_color = input(f"Enter new color for {label}: ").strip().lower()
 
-        if new_color in constants.VALID_COLORS:
-            color_config[field] = new_color
-        else:
-            print(f"Invalid color. Keeping current color: {color_config[field]}")
-            input("Press Enter to continue...")
-        return True
+            if new_color in constants.VALID_COLORS:
+                color_config[color_key] = new_color
+            else:
+                print(f"Invalid color. Keeping current color: {color_config.get(color_key, constants.COLOR_WHITE)}")
+                input("Press Enter to continue...")
+            return True
 
     return choice != "0"
 
@@ -200,21 +220,9 @@ def reorder_fields_menu(config):
     print()
     print("Current order:")
 
-    field_names = {
-        constants.FIELD_CURRENT_DIR: "Current Directory",
-        constants.FIELD_GIT_BRANCH: "Git Branch",
-        constants.FIELD_MODEL: "Model",
-        constants.FIELD_VERSION: "Version",
-        constants.FIELD_CONTEXT_REMAINING: "Context Remaining",
-        constants.FIELD_TOKENS: "Tokens",
-        constants.FIELD_COST: "Cost",
-        constants.FIELD_DURATION: "Duration",
-        constants.FIELD_LINES_CHANGED: "Lines Changed",
-        constants.FIELD_OUTPUT_STYLE: "Output Style"
-    }
-
+    # Dynamically show current field order with display names
     for i, field in enumerate(config[constants.CONFIG_KEY_FIELD_ORDER], 1):
-        label = field_names.get(field, field)
+        label = _get_field_display_name(field)
         print(f"{i}. {label}")
 
     print()
@@ -297,7 +305,13 @@ def preview_statusline(config):
         constants.FIELD_TOKENS_PER_MINUTE: 279900,
         constants.FIELD_DURATION: 11220000,
         constants.FIELD_LINES_CHANGED: 450,
-        constants.FIELD_OUTPUT_STYLE: "default"
+        constants.FIELD_OUTPUT_STYLE: "default",
+        constants.FIELD_CPU_USAGE: 45.2,
+        constants.FIELD_MEMORY_USAGE: 68.5,
+        constants.FIELD_BATTERY: 85,
+        constants.FIELD_PYTHON_VERSION: "3.11.5",
+        constants.FIELD_PYTHON_VENV: "venv",
+        constants.FIELD_DATETIME: "2026-02-05 14:30:15"
     }
 
     print("Compact Mode:")

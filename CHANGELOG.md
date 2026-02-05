@@ -5,6 +5,26 @@ All notable changes to the Claude Code Statusline Tool will be documented in thi
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2026-02-05
+
+### Fixed
+- **Memory usage display**: Fixed macOS memory parsing bugs that caused memory field to not display
+  - Fixed page size extraction from vm_stat output (was reading wrong array index)
+  - Fixed wired pages detection (changed from "Pages wired" to "Pages wired down")
+- **Configure tool**: Added missing system monitoring fields (cpu_usage, memory_usage, battery, python_version, python_venv, datetime) to all configuration menus
+
+### Changed
+- **Memory format**: Memory usage now displays as percentage (e.g., "40%") instead of absolute values (e.g., "18.5GB") for consistency with CPU and battery displays
+- **Configure tool refactoring**: Eliminated hardcoded field lists in configure.py by dynamically generating menus from existing constants (VALID_FIELD_NAMES, DEFAULT_ICONS, DEFAULT_COLORS)
+  - Reduced maintenance overhead - new fields automatically appear in all menus
+  - Single source of truth for field definitions
+  - Added helper functions `_get_field_display_name()` and `_get_icon_display_name()`
+
+### Technical Improvements
+- Updated all platform-specific memory functions (_get_memory_linux, _get_memory_macos, _get_memory_windows) to calculate and return percentages
+- Updated test suite to reflect percentage format for memory usage
+- All 216 tests passing
+
 ## [1.0.0] - 2026-02-04
 
 ### Added
