@@ -1,6 +1,7 @@
 import os
+from typing import Dict, Optional
 
-COLORS = {
+COLORS: Dict[str, str] = {
     "cyan": "\033[96m",
     "green": "\033[92m",
     "blue": "\033[94m",
@@ -11,11 +12,18 @@ COLORS = {
     "reset": "\033[0m"
 }
 
-def is_color_enabled():
-    """Check if colors should be used (respects NO_COLOR environment variable)."""
+# Module-level override for color state (set by statusline.py)
+_color_override: Optional[bool] = None
+
+def is_color_enabled() -> bool:
+    """Check if colors should be used (respects NO_COLOR environment variable and override)."""
+    # Check override first (set by statusline when config disables colors)
+    if _color_override is not None:
+        return _color_override
+    # Fall back to NO_COLOR environment variable
     return os.environ.get("NO_COLOR") is None
 
-def colorize(text, color_name):
+def colorize(text: str, color_name: str) -> str:
     """Wrap text in ANSI color codes."""
     if not is_color_enabled():
         return text
@@ -27,6 +35,6 @@ def colorize(text, color_name):
         return f"{color_code}{text}{reset_code}"
     return text
 
-def reset():
+def reset() -> str:
     """Return ANSI reset code."""
     return COLORS["reset"] if is_color_enabled() else ""

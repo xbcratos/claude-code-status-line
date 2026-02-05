@@ -1,8 +1,9 @@
 import os
 import subprocess
 from pathlib import Path
+from typing import Optional
 
-def get_git_branch(cwd):
+def get_git_branch(cwd: str) -> str:
     """Get current git branch name."""
     try:
         # Method 1: Read .git/HEAD directly (faster)
@@ -34,7 +35,7 @@ def get_git_branch(cwd):
             cwd=cwd,
             capture_output=True,
             text=True,
-            timeout=2
+            timeout=0.5
         )
         if result.returncode == 0:
             return result.stdout.strip()

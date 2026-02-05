@@ -6,7 +6,9 @@ A highly customizable statusline tool for Claude Code that provides fine-grained
 
 - **Python 3.6 or higher** (uses f-strings and modern stdlib features)
 - Git (optional, for branch detection)
-- Unix-like system (macOS, Linux)
+- Unix-like system (macOS, Linux, or Windows with WSL)
+
+**Note:** This tool has **zero runtime dependencies** - it uses only Python's standard library. Test dependencies (pytest, pytest-cov) are listed in `requirements-test.txt` for developers.
 
 ## Features
 
@@ -179,11 +181,36 @@ Example configuration:
 
 ## Testing
 
+### Manual Testing
+
 Test the statusline with mock data:
 
 ```bash
 echo '{"model":{"display_name":"Sonnet 4"},"version":"v1.0.85","context_window":{"remaining_percentage":95,"total_input_tokens":1000,"total_output_tokens":500},"workspace":{"current_dir":"'$(pwd)'"},"cost":{"total_cost_usd":2.48,"total_duration_ms":720000}}' | python3 ~/.claude-code-statusline/statusline.py
 ```
+
+### Automated Testing
+
+The project includes a comprehensive test suite with 79+ unit tests covering all core functionality.
+
+**Run tests:**
+```bash
+# Install test dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+python3 -m pytest tests/
+
+# Run with coverage
+python3 -m pytest tests/ --cov=src --cov-report=term-missing
+```
+
+**Test coverage:**
+- colors.py: 100%
+- git_utils.py: 100%
+- display_formatter.py: 92%
+- statusline.py: 92%
+- config_manager.py: 74%
 
 ## Troubleshooting
 

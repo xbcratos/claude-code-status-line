@@ -4,25 +4,30 @@ The Claude Code Statusline Tool allows you to customize the order in which field
 
 ## How Field Ordering Works
 
-Fields are grouped into semantic lines, but **within each line, the order respects your `field_order` configuration**:
+Fields are grouped into semantic lines using constants defined in `display_formatter.py` (v1.0.2+):
+- `LINE_IDENTITY = 1`: Identity information
+- `LINE_STATUS = 2`: Status information
+- `LINE_METRICS = 3`: Metrics and statistics
+
+**Within each line, the order respects your `field_order` configuration.**
 
 ### Line Assignment
 
-**Line 1 (Identity):**
+**Line 1 (Identity) - `LINE_IDENTITY`:**
 - `current_dir` - Current directory
 - `git_branch` - Git branch name
 - `model` - Model name
 - `version` - Claude Code version
 - `output_style` - Output style name
 
-**Line 2 (Status):**
+**Line 2 (Status) - `LINE_STATUS`:**
 - `context_remaining` - Context window remaining (compact mode)
-- `context_remaining` + `duration` - Both shown (large mode)
+- `context_remaining` + `duration` - Both shown (verbose mode)
 
-**Line 3 (Metrics):**
+**Line 3 (Metrics) - `LINE_METRICS`:**
 - `cost` - Total cost
 - `tokens` - Total tokens
-- `duration` - Session duration (compact mode)
+- `duration` - Session duration (compact mode, moves to Line 2 in verbose mode)
 - `lines_changed` - Lines modified
 
 ## Default Field Order
@@ -121,4 +126,4 @@ Edit `~/.claude-code-statusline/config.json`:
 }
 ```
 
-**Note:** You control the order within each line, but cannot move fields between lines 1, 2, and 3.
+**Note:** You control the order within each line, but cannot move fields between lines 1, 2, and 3. Line assignments are defined in `display_formatter.py` using the `FIELD_LINE_ASSIGNMENT` dictionary (v1.0.2+).

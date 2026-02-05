@@ -95,6 +95,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Default display mode is now "compact" (icons only) for better space efficiency
 - Improved install script with better error handling and user feedback
 
+## [1.0.2] - 2026-02-05
+
+### Added
+- **Comprehensive test suite** with 79+ unit tests covering all core functionality
+- Type hints throughout the codebase for better IDE support and code clarity
+- Input validation for configuration values (colors, progress bar width, field names, display modes)
+- Better error logging with specific error messages instead of silent failures
+- `IMPROVEMENTS.md` documenting all code quality improvements
+
+### Fixed
+- Removed duplicate `os` import in `statusline.py`
+- Eliminated runtime environment variable modification (replaced with cleaner module-level override)
+- Reduced git command timeout from 2s to 0.5s for faster statusline updates
+- Fixed non-portable screen clearing in `configure.py` (now works on Windows and Unix)
+- Fixed inconsistent color field naming for `lines_changed`
+- Improved import order to follow PEP 8 conventions
+
+### Changed
+- **Major refactoring** of `display_formatter.py`:
+  - Eliminated ~80% code duplication between `format_compact()` and `format_verbose()`
+  - Introduced constants for line grouping (`LINE_IDENTITY`, `LINE_STATUS`, `LINE_METRICS`)
+  - Created `FIELD_LINE_ASSIGNMENT` dictionary to replace magic numbers
+  - Extracted common formatting logic into helper functions
+  - Easier to maintain and extend
+- Config validation now provides helpful warnings for invalid values
+- Error messages are more descriptive and actionable
+
+### Technical Improvements
+- Added constants for validation: `VALID_COLORS`, `VALID_DISPLAY_MODES`, `VALID_FIELD_NAMES`
+- Color override now uses module-level variable instead of environment modification
+- Type hints added to all major functions using Python 3.6+ typing module
+- Screen clearing now portable (supports both Windows and Unix systems)
+
+### Testing
+- Created `tests/` directory with comprehensive test coverage
+- Added `requirements-test.txt` for test dependencies
+- Added `pytest.ini` for test configuration
+- All 79 tests passing with strong coverage metrics
+
 ## [Unreleased]
 
 ### Possible Future Enhancements

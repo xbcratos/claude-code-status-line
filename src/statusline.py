@@ -1,8 +1,17 @@
 #!/usr/bin/env python3
 import sys
+from pathlib import Path
+
+# Add src directory to path for imports (must be before other local imports)
+sys.path.insert(0, str(Path(__file__).parent))
+
 import json
 import os
-from pathlib import Path
+from typing import Dict, Any
+from config_manager import load_config
+from display_formatter import format_compact, format_verbose
+from git_utils import get_git_branch
+import colors
 
 # Require Python 3.6+
 if sys.version_info < (3, 6):
@@ -10,15 +19,7 @@ if sys.version_info < (3, 6):
     print(f"Current version: {sys.version}", file=sys.stderr)
     sys.exit(1)
 
-# Add src directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent))
-
-from config_manager import load_config
-from display_formatter import format_compact, format_verbose
-from git_utils import get_git_branch
-import colors
-
-def extract_data(json_data, config):
+def extract_data(json_data: Dict[str, Any], config: Dict[str, Any]) -> Dict[str, Any]:
     """Extract relevant fields from Claude Code JSON input."""
     data = {}
 
@@ -92,7 +93,7 @@ def extract_data(json_data, config):
 
     return data
 
-def main():
+def main() -> None:
     """Main entry point for statusline script."""
     try:
         # Read JSON from stdin
@@ -102,11 +103,14 @@ def main():
         # Load user config
         config = load_config()
 
-        # Override color setting if NO_COLOR is set OR if disabled in config
-        if not colors.is_color_enabled() or not config.get("enable_colors", True):
-            # Temporarily disable colors in the colors module
-            import os
-            os.environ["NO_COLOR"] = "1"
+        # Set color state in colors module based on config and environment
+        # Note: We modify the module state rather than environment to avoid side effects
+        if not config.get("enable_colors", True):
+            colors._color_override = False
+        elif not colors.is_color_enabled():
+            colors._color_override = False
+        else:
+            colors._color_override = None
 
         # Extract data from JSON
         data = extract_data(json_data, config)

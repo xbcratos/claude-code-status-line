@@ -2,22 +2,24 @@
 import sys
 from pathlib import Path
 
-# Require Python 3.6+
-if sys.version_info < (3, 6):
-    print("Error: Python 3.6 or higher is required", file=sys.stderr)
-    print(f"Current version: {sys.version}", file=sys.stderr)
-    sys.exit(1)
-
-# Add src directory to path for imports
+# Add src directory to path for imports (must be before other local imports)
 sys.path.insert(0, str(Path(__file__).parent))
 
 from config_manager import load_config, save_config, get_default_config
 from display_formatter import format_compact, format_verbose
 import colors
 
+# Require Python 3.6+
+if sys.version_info < (3, 6):
+    print("Error: Python 3.6 or higher is required", file=sys.stderr)
+    print(f"Current version: {sys.version}", file=sys.stderr)
+    sys.exit(1)
+
 def clear_screen():
-    """Clear the terminal screen."""
-    print("\033[2J\033[H", end="")
+    """Clear the terminal screen in a portable way."""
+    import os
+    # Use os.system to clear screen portably
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 def show_menu(config):
     """Display main configuration menu."""
