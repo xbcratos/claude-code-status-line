@@ -27,7 +27,6 @@ FIELD_CPU_USAGE = "cpu_usage"
 FIELD_MEMORY_USAGE = "memory_usage"
 FIELD_BATTERY = "battery"
 FIELD_PYTHON_VERSION = "python_version"
-FIELD_PYTHON_VENV = "python_venv"
 FIELD_DATETIME = "datetime"
 
 # Calculated/Rate Fields
@@ -69,7 +68,6 @@ VALID_FIELD_NAMES: List[str] = [
     FIELD_MEMORY_USAGE,
     FIELD_BATTERY,
     FIELD_PYTHON_VERSION,
-    FIELD_PYTHON_VENV,
     FIELD_DATETIME,
 ]
 
@@ -92,7 +90,6 @@ FIELD_LABELS: Dict[str, str] = {
     FIELD_MEMORY_USAGE: "Memory:",
     FIELD_BATTERY: "Battery:",
     FIELD_PYTHON_VERSION: "Python:",
-    FIELD_PYTHON_VENV: "Venv:",
     FIELD_DATETIME: "Time:",
 }
 
@@ -114,6 +111,5 @@ FIELD_ICON_KEYS: Dict[str, str] = {
     FIELD_MEMORY_USAGE: "memory",
     FIELD_BATTERY: "battery",
     FIELD_PYTHON_VERSION: "python",
-    FIELD_PYTHON_VENV: "python",
     FIELD_DATETIME: "datetime",
 }

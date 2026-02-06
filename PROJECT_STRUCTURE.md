@@ -21,7 +21,7 @@ claude-code-statusline/
 │   ├── fields.py                 # Field class hierarchy (SimpleField, ProgressField, etc.) (v1.0.3+)
 │   ├── models.py                 # Data models (StatusLineData, Configuration) (v1.0.3+)
 │   └── exceptions.py             # Custom exception hierarchy (v1.0.4+)
-├── tests/                        # Test suite (154 tests, 70% coverage)
+├── tests/                        # Test suite (232 tests, 75% coverage)
 │   ├── __init__.py               # Test package initializer
 │   ├── test_colors.py            # Color module tests (10 tests)
 │   ├── test_config_manager.py    # ConfigManager tests (20 tests)
@@ -329,16 +329,17 @@ Hierarchical exception classes for better error handling.
 **Benefits:** Specific error handling and better debugging
 
 ### configure.py (Interactive Configuration)
-Menu-driven configuration tool (unchanged in v1.1.0).
+Menu-driven configuration tool with field grouping by line assignment.
 
 **Key Functions:**
 - `main()`: Entry point
-- `show_menu(config)`: Display main menu
-- `toggle_fields_menu(config)`: Toggle field visibility
+- `show_menu(config)`: Display main menu with field grouping by line
+- `toggle_fields_menu(config)`: Toggle field visibility (grouped by Line 1/2/3)
 - `customize_icons_menu(config)`: Customize icons
 - `customize_colors_menu(config)`: Customize colors
 - `reorder_fields_menu(config)`: Reorder fields
 - `preview_statusline(config)`: Preview with mock data
+- `_get_field_display_name(field_name)`: Get user-friendly display names (e.g., "Model ID")
 
 ## Installation Flow
 
@@ -382,18 +383,19 @@ Menu-driven configuration tool (unchanged in v1.1.0).
 ### Automated Testing (v1.0.4)
 - **154 comprehensive tests** (143 unit + 11 integration)
 - Test framework: pytest with pytest-cov
-- Coverage: 70% overall (96.3% excluding interactive CLI)
+- Coverage: 75% overall (1345 statements, configure.py excluded as interactive CLI)
 - Run with: `python3 -m pytest tests/`
 
 **Test Coverage by Module:**
 - `test_colors.py`: 10 tests, 100% coverage
-- `test_git_utils.py`: 10 tests, 100% coverage
+- `test_git_utils.py`: 19 tests, 100% coverage
 - `test_exceptions.py`: 10 tests, 100% coverage
 - `test_models.py`: 54 tests, 100% coverage
+- `test_system_utils.py`: 54 tests, 99% coverage
 - `test_display_formatter.py`: 25 tests, 97% coverage
-- `test_statusline.py`: 21 tests, 93% coverage
-- `test_config_manager.py`: 20 tests, 93% coverage
-- `test_integration.py`: 11 integration tests
+- `test_config_manager.py`: 20 tests, 94% coverage
+- `test_statusline.py`: 38 tests, 90% coverage
+- `test_integration.py`: 2 integration tests
   - Full statusline output verification
   - End-to-end workflow testing
   - Installation helper testing
@@ -459,7 +461,7 @@ See `EXTENDING.md` for detailed guides and examples.
 - Custom exception hierarchy
 - StatusLineFormatter class
 - Logging infrastructure
-- 154 tests, 70% coverage
+- 232 tests, 75% coverage
 
 ### v1.1.0: Facade Pattern
 - ConfigManager class (stateful, with caching)

@@ -119,7 +119,6 @@ The configuration tool provides:
 
 **Python Environment (v1.2.0+):**
 - **Python Version**: Current Python interpreter version
-- **Python Venv**: Active virtual environment name
 - **Date/Time**: Current date and time with seconds precision
 
 ### Color Customization
@@ -164,7 +163,6 @@ Example configuration:
     "memory_usage": true,
     "battery": true,
     "python_version": true,
-    "python_venv": true,
     "datetime": true
   },
   "field_order": [
@@ -182,8 +180,7 @@ Example configuration:
     "lines_changed",
     "cpu_usage",
     "memory_usage",
-    "battery",
-    "python_venv"
+    "battery"
   ],
   "icons": {
     "directory": "📁",
@@ -246,8 +243,8 @@ python3 -m pytest tests/
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-**Test coverage (v1.2.3):**
-- Overall: 77% coverage (1294 statements)
+**Test coverage (v1.2.5):**
+- Overall: 75% coverage (1345 statements)
 - colors.py: 100%
 - git_utils.py: 100%
 - exceptions.py: 100%
@@ -258,6 +255,8 @@ python3 -m pytest tests/ --cov=src --cov-report=term-missing
 - config_manager.py: 94%
 - fields.py: 93%
 - statusline.py: 90%
+- python_utils.py: 63%
+- configure.py: 0% (interactive CLI, not unit-tested)
 
 Test breakdown: 232 tests (221 unit tests + 11 integration tests)
 

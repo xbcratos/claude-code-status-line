@@ -392,12 +392,6 @@ def create_field_registry() -> Dict[str, Field]:
             line=constants.LINE_IDENTITY,
             label=constants.FIELD_LABELS[constants.FIELD_PYTHON_VERSION]
         ),
-        constants.FIELD_PYTHON_VENV: SimpleField(
-            name=constants.FIELD_PYTHON_VENV,
-            icon_key=constants.ICON_KEY_PYTHON,
-            line=constants.LINE_METRICS,
-            label=constants.FIELD_LABELS[constants.FIELD_PYTHON_VENV]
-        ),
         constants.FIELD_DATETIME: SimpleField(
             name=constants.FIELD_DATETIME,
             icon_key=constants.ICON_KEY_DATETIME,

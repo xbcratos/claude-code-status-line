@@ -23,7 +23,6 @@ from .fields import (
     FIELD_MEMORY_USAGE,
     FIELD_BATTERY,
     FIELD_PYTHON_VERSION,
-    FIELD_PYTHON_VENV,
     FIELD_DATETIME,
 )
 
@@ -66,7 +65,6 @@ FIELD_LINE_ASSIGNMENT: Dict[str, int] = {
     FIELD_CPU_USAGE: LINE_METRICS,
     FIELD_MEMORY_USAGE: LINE_METRICS,
     FIELD_BATTERY: LINE_METRICS,
-    FIELD_PYTHON_VENV: LINE_METRICS,
 }
 
 # ============================================================================

@@ -28,7 +28,7 @@ def _get_field_display_name(field_name):
     display_names = {
         constants.FIELD_CURRENT_DIR: "Current Directory",
         constants.FIELD_GIT_BRANCH: "Git Branch",
-        constants.FIELD_MODEL: "Model Name",
+        constants.FIELD_MODEL: "Model ID",
         constants.FIELD_VERSION: "Version",
         constants.FIELD_OUTPUT_STYLE: "Output Style",
         constants.FIELD_CONTEXT_REMAINING: "Context Remaining",
@@ -40,7 +40,6 @@ def _get_field_display_name(field_name):
         constants.FIELD_MEMORY_USAGE: "Memory Usage",
         constants.FIELD_BATTERY: "Battery",
         constants.FIELD_PYTHON_VERSION: "Python Version",
-        constants.FIELD_PYTHON_VENV: "Python Venv",
         constants.FIELD_DATETIME: "Date/Time",
     }
     return display_names.get(field_name, field_name.replace('_', ' ').title())
@@ -59,11 +58,39 @@ def show_menu(config):
 
     print("2. Toggle Visible Fields")
     visible = config[constants.CONFIG_KEY_VISIBLE_FIELDS]
-    # Use VALID_FIELD_NAMES to dynamically show all fields
+
+    # Group fields by line assignment
+    line1_fields = []
+    line2_fields = []
+    line3_fields = []
+
     for field in constants.VALID_FIELD_NAMES:
+        line_num = constants.FIELD_LINE_ASSIGNMENT.get(field, constants.LINE_METRICS)
+        if line_num == constants.LINE_IDENTITY:
+            line1_fields.append(field)
+        elif line_num == constants.LINE_STATUS:
+            line2_fields.append(field)
+        else:
+            line3_fields.append(field)
+
+    # Display fields grouped by line
+    print("   Line 1 (Identity):")
+    for field in line1_fields:
         status = "✓" if visible.get(field, False) else "✗"
         label = _get_field_display_name(field)
-        print(f"   {status} {label}")
+        print(f"     {status} {label}")
+
+    print("   Line 2 (Status):")
+    for field in line2_fields:
+        status = "✓" if visible.get(field, False) else "✗"
+        label = _get_field_display_name(field)
+        print(f"     {status} {label}")
+
+    print("   Line 3 (Metrics):")
+    for field in line3_fields:
+        status = "✓" if visible.get(field, False) else "✗"
+        label = _get_field_display_name(field)
+        print(f"     {status} {label}")
     print()
 
     print("3. Customize Icons")
@@ -87,13 +114,52 @@ def toggle_fields_menu(config):
 
     visible = config[constants.CONFIG_KEY_VISIBLE_FIELDS]
 
-    # Dynamically build field menu from VALID_FIELD_NAMES
+    # Group fields by line assignment
+    line1_fields = []  # LINE_IDENTITY
+    line2_fields = []  # LINE_STATUS
+    line3_fields = []  # LINE_METRICS
+
+    for field in constants.VALID_FIELD_NAMES:
+        line_num = constants.FIELD_LINE_ASSIGNMENT.get(field, constants.LINE_METRICS)
+        if line_num == constants.LINE_IDENTITY:
+            line1_fields.append(field)
+        elif line_num == constants.LINE_STATUS:
+            line2_fields.append(field)
+        else:  # LINE_METRICS
+            line3_fields.append(field)
+
+    # Build field list with line grouping
     field_list = []
-    for i, field in enumerate(constants.VALID_FIELD_NAMES, 1):
+    field_counter = 1
+
+    # Line 1 - Identity
+    print("Line 1 (Identity - who you are and what you're working on):")
+    for field in line1_fields:
         label = _get_field_display_name(field)
-        field_list.append((str(i), field, label))
+        field_list.append((str(field_counter), field, label))
         status = "✓" if visible.get(field, False) else "✗"
-        print(f"{i}. {status} {label}")
+        print(f"  {field_counter}. {status} {label}")
+        field_counter += 1
+    print()
+
+    # Line 2 - Status
+    print("Line 2 (Status - current session state):")
+    for field in line2_fields:
+        label = _get_field_display_name(field)
+        field_list.append((str(field_counter), field, label))
+        status = "✓" if visible.get(field, False) else "✗"
+        print(f"  {field_counter}. {status} {label}")
+        field_counter += 1
+    print()
+
+    # Line 3 - Metrics
+    print("Line 3 (Metrics - usage and system stats):")
+    for field in line3_fields:
+        label = _get_field_display_name(field)
+        field_list.append((str(field_counter), field, label))
+        status = "✓" if visible.get(field, False) else "✗"
+        print(f"  {field_counter}. {status} {label}")
+        field_counter += 1
 
     print()
     print("0. Back to main menu")
@@ -310,7 +376,6 @@ def preview_statusline(config):
         constants.FIELD_MEMORY_USAGE: 68.5,
         constants.FIELD_BATTERY: 85,
         constants.FIELD_PYTHON_VERSION: "3.11.5",
-        constants.FIELD_PYTHON_VENV: "venv",
         constants.FIELD_DATETIME: "2026-02-05 14:30:15"
     }
 

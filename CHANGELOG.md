@@ -24,7 +24,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Features
 - **Statusline Fields**:
-  - Model name display
+  - Model ID display
   - Version information
   - Context window remaining percentage with progress bar
   - Total tokens with tokens per minute calculation
@@ -287,8 +287,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Python Environment Detection**:
   - `python_version`: Current Python version (e.g., "3.11.5")
-  - `python_venv`: Virtual environment name when active
-  - Positioned on LINE_IDENTITY alongside model and version info
+  - Positioned on LINE_IDENTITY
 
 - **Date and Time Display**:
   - `datetime`: Current date and time with seconds precision
@@ -310,7 +309,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - **Field Positioning**: Reorganized LINE_IDENTITY (line 1) to include:
   - Current directory, git branch (with status), model, version, output style, python version, datetime
-  - System monitoring fields (CPU, memory, battery, python venv) remain on LINE_METRICS (line 3)
+  - System monitoring fields (CPU, memory, battery) remain on LINE_METRICS (line 3)
 
 - **Default Configuration**: All new fields enabled by default
   - Users can disable unwanted fields via configure.py or config.json
@@ -356,7 +355,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Documentation**: Updated README.md example configuration to accurately reflect default settings
   - **Confirmed memory_usage is enabled by default** (was enabled in v1.2.0, documentation was outdated)
   - Added missing system monitoring fields to examples: `cpu_usage`, `memory_usage`, `battery`
-  - Added missing Python environment fields: `python_version`, `python_venv`
+  - Added missing Python environment field: `python_version`
   - Added missing `datetime` field
   - Fixed memory icon in examples (🧮 abacus instead of 🧠 brain)
   - Fixed CPU icon in examples (💻 computer instead of 🖥️ desktop)
@@ -421,7 +420,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Memory usage display**: Fixed macOS memory parsing bugs that caused memory field to not display
   - Fixed page size extraction from vm_stat output (was reading wrong array index)
   - Fixed wired pages detection (changed from "Pages wired" to "Pages wired down")
-- **Configure tool**: Added missing system monitoring fields (cpu_usage, memory_usage, battery, python_version, python_venv, datetime) to all configuration menus
+- **Configure tool**: Added missing system monitoring fields (cpu_usage, memory_usage, battery, python_version, datetime) to all configuration menus
 
 ### Changed
 - **Memory format**: Memory usage now displays as percentage (e.g., "40%") instead of absolute values (e.g., "18.5GB") for consistency with CPU and battery displays
@@ -452,6 +451,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Technical Improvements
 - Separated git command timeout (0.5s for local operations) from gh command timeout (2.0s for API calls)
 - All 232 tests passing
+
+## [1.2.5] - 2026-02-06
+
+### Changed
+- **Configure Tool Improvements**:
+  - Changed "Model Name" to "Model ID" in field display names for clarity
+  - Grouped fields by line assignment in toggle fields menu:
+    - Line 1 (Identity): Fields showing who you are and what you're working on
+    - Line 2 (Status): Fields showing current session state
+    - Line 3 (Metrics): Fields showing usage and system stats
+  - Improved main menu to show field grouping by line
+  - Added descriptive line headers to make field organization clearer
+
+### Removed
+- **python_venv field**: Removed virtual environment name field as it was redundant
+  - python_version field already provides Python environment information
+  - Reduces clutter in the status line for users not working in virtual environments
+  - Removed from all code, tests, and documentation
+
+### Documentation
+- Updated CHANGELOG.md: Changed "Model name display" to "Model ID display" for consistency
+- Updated test coverage documentation (v1.2.5): 75% coverage (1345 statements)
 
 ## [Unreleased]
 

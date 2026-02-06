@@ -243,21 +243,39 @@ class TestEndToEndWorkflow:
         json_str = json.dumps(json_input)
         monkeypatch.setattr('sys.stdin', StringIO(json_str))
 
-        # Run main function
-        statusline.main()
+        # Load config and ensure version field is visible for test
+        from config_manager import load_config, save_config
+        config = load_config()
+        original_version_visible = config["visible_fields"].get("version", True)
+        original_tokens_visible = config["visible_fields"].get("tokens", True)
+        original_cost_visible = config["visible_fields"].get("cost", True)
+        config["visible_fields"]["version"] = True
+        config["visible_fields"]["tokens"] = True
+        config["visible_fields"]["cost"] = True
+        save_config(config)
 
-        # Capture output
-        captured = capsys.readouterr()
-        output = captured.out
+        try:
+            # Run main function
+            statusline.main()
 
-        # Verify output contains expected elements
-        assert "my-project" in output
-        assert "claude-sonnet-4-5-20250929" in output
-        assert "v1.0.85" in output
-        assert "80%" in output
-        assert "75000 tok" in output  # 50000 + 25000
-        assert "$10.50" in output
-        # Note: lines_changed and output_style are not visible by default
+            # Capture output
+            captured = capsys.readouterr()
+            output = captured.out
+
+            # Verify output contains expected elements
+            assert "my-project" in output
+            assert "claude-sonnet-4-5-20250929" in output
+            assert "v1.0.85" in output
+            assert "80%" in output
+            assert "75000 tok" in output  # 50000 + 25000
+            assert "$10.50" in output
+            # Note: lines_changed and output_style are not visible by default
+        finally:
+            # Restore original visibility settings
+            config["visible_fields"]["version"] = original_version_visible
+            config["visible_fields"]["tokens"] = original_tokens_visible
+            config["visible_fields"]["cost"] = original_cost_visible
+            save_config(config)
 
     def test_statusline_main_verbose_mode(self, monkeypatch, capsys):
         """Test main() function with verbose mode."""
@@ -272,10 +290,13 @@ class TestEndToEndWorkflow:
         json_str = json.dumps(json_input)
         monkeypatch.setattr('sys.stdin', StringIO(json_str))
 
-        # Load config and set to verbose
+        # Load config and set to verbose, ensure version field is visible
         from config_manager import load_config, save_config, CONFIG_FILE
         config = load_config()
+        original_display_mode = config["display_mode"]
+        original_version_visible = config["visible_fields"].get("version", True)
         config["display_mode"] = "verbose"
+        config["visible_fields"]["version"] = True
         save_config(config)
 
         try:
@@ -288,8 +309,9 @@ class TestEndToEndWorkflow:
             assert "Version:" in output
             assert "Directory:" in output
         finally:
-            # Restore compact mode
-            config["display_mode"] = "compact"
+            # Restore original settings
+            config["display_mode"] = original_display_mode
+            config["visible_fields"]["version"] = original_version_visible
             save_config(config)
 
 

@@ -11,7 +11,7 @@ from typing import Dict, Any
 
 from git_utils import get_git_branch, get_git_status, get_pr_status
 from system_utils import get_cpu_usage, get_memory_usage, get_battery_status
-from python_utils import get_python_version, get_python_venv
+from python_utils import get_python_version
 
 
 class DataExtractor:
@@ -256,10 +256,6 @@ class DataExtractor:
         python_version = get_python_version()
         if python_version:
             data["python_version"] = python_version
-
-        venv = get_python_venv()
-        if venv:
-            data["python_venv"] = venv
 
         return data
 
