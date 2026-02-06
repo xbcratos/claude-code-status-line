@@ -474,6 +474,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated CHANGELOG.md: Changed "Model name display" to "Model ID display" for consistency
 - Updated test coverage documentation (v1.2.5): 75% coverage (1345 statements)
 
+## [1.2.6] - 2026-02-06
+
+### Changed
+- **Git Status Color Improvements**: Individual colors for git status indicators for better visual clarity
+  - ✓ Clean status: Green (unchanged)
+  - ★ Dirty status: Yellow (changed from green)
+  - ↑N Ahead: Cyan (new color, was green)
+  - ↓N Behind: Purple/Magenta (new color, was green)
+  - Makes it easier to identify repository state at a glance
+
+### Fixed
+- Updated test expectations in test_git_utils.py to match colored output
+
+### Documentation
+- Updated README.md: Added color details to Git Branch field description
+- Updated test coverage stats (v1.2.6): 75% coverage (1331 statements)
+- git_utils.py now at 100% coverage
+
 ## [Unreleased]
 
 ### Possible Future Enhancements

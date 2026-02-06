@@ -106,7 +106,10 @@ The configuration tool provides:
 - **Context Remaining**: Percentage of context window remaining (with progress bar)
 - **Tokens**: Total input + output tokens (with tokens per minute)
 - **Current Directory**: Current working directory name
-- **Git Branch**: Current git branch with status indicators (✓ clean, ★ dirty, ↑N ahead, ↓N behind) and PR status with color-coded indicators (green for approved/passing checks, yellow for draft/pending checks, red for failing checks/changes requested)
+- **Git Branch**: Current git branch with color-coded status indicators:
+  - ✓ clean (green), ★ dirty (yellow)
+  - ↑N ahead (cyan), ↓N behind (purple)
+  - PR status: approved/passing (green), draft/pending (yellow), failing/changes requested (red)
 - **Cost**: Total cost in USD (with cost per hour)
 - **Duration**: Session duration
 - **Lines Changed**: Total lines added + removed
@@ -243,19 +246,20 @@ python3 -m pytest tests/
 python3 -m pytest tests/ --cov=src --cov-report=term-missing
 ```
 
-**Test coverage (v1.2.5):**
-- Overall: 75% coverage (1345 statements)
+**Test coverage (v1.2.6):**
+- Overall: 75% coverage (1331 statements)
 - colors.py: 100%
 - git_utils.py: 100%
 - exceptions.py: 100%
 - models.py: 100%
+- constants: 100%
 - system_utils.py: 99%
-- data_extractor.py: 97%
+- data_extractor.py: 98%
 - display_formatter.py: 97%
 - config_manager.py: 94%
 - fields.py: 93%
 - statusline.py: 90%
-- python_utils.py: 63%
+- python_utils.py: 71%
 - configure.py: 0% (interactive CLI, not unit-tested)
 
 Test breakdown: 232 tests (221 unit tests + 11 integration tests)

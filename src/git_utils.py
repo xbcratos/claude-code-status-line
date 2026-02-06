@@ -10,19 +10,19 @@ from colors import colorize
 
 def get_git_status(cwd: str) -> str:
     """
-    Get git status indicators (dirty/clean, ahead/behind).
+    Get git status indicators (dirty/clean, ahead/behind) with colors.
 
-    Returns a formatted string with status indicators:
-    - "✓" for clean
-    - "★" for dirty (uncommitted changes)
-    - "↑N" for N commits ahead
-    - "↓N" for N commits behind
+    Returns a formatted string with colored status indicators:
+    - "✓" for clean (green)
+    - "★" for dirty (yellow)
+    - "↑N" for N commits ahead (cyan)
+    - "↓N" for N commits behind (purple/magenta)
 
     Args:
         cwd: Current working directory path
 
     Returns:
-        Status string (e.g., "★ ↑2", "✓", "★ ↓1 ↑3") or empty string
+        Status string with colored indicators (e.g., "★ ↑2", "✓", "★ ↓1 ↑3") or empty string
     """
     try:
         # Check if we're in a git repository
@@ -38,17 +38,22 @@ def get_git_status(cwd: str) -> str:
 
         indicators = []
 
-        # Check for uncommitted changes
+        # Check for uncommitted changes (green for clean, yellow for dirty)
         is_dirty = _is_git_dirty(cwd)
         if is_dirty is not None:
-            indicators.append("★" if is_dirty else "✓")
+            if is_dirty:
+                indicators.append(colorize("★", constants.COLOR_YELLOW))
+            else:
+                indicators.append(colorize("✓", constants.COLOR_GREEN))
 
         # Check for ahead/behind
         ahead, behind = _get_ahead_behind(cwd)
         if behind > 0:
-            indicators.append(f"↓{behind}")
+            # Purple/magenta for behind
+            indicators.append(colorize(f"↓{behind}", constants.COLOR_MAGENTA))
         if ahead > 0:
-            indicators.append(f"↑{ahead}")
+            # Cyan for ahead
+            indicators.append(colorize(f"↑{ahead}", constants.COLOR_CYAN))
 
         return " ".join(indicators) if indicators else ""
 

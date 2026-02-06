@@ -383,17 +383,19 @@ Menu-driven configuration tool with field grouping by line assignment.
 ### Automated Testing (v1.0.4)
 - **154 comprehensive tests** (143 unit + 11 integration)
 - Test framework: pytest with pytest-cov
-- Coverage: 75% overall (1345 statements, configure.py excluded as interactive CLI)
+- Coverage: 75% overall (1331 statements, configure.py excluded as interactive CLI)
 - Run with: `python3 -m pytest tests/`
 
-**Test Coverage by Module:**
+**Test Coverage by Module (v1.2.6):**
 - `test_colors.py`: 10 tests, 100% coverage
-- `test_git_utils.py`: 19 tests, 100% coverage
+- `test_git_utils.py`: 48 tests, 100% coverage
 - `test_exceptions.py`: 10 tests, 100% coverage
 - `test_models.py`: 54 tests, 100% coverage
 - `test_system_utils.py`: 54 tests, 99% coverage
+- `test_data_extractor.py`: 98% coverage
 - `test_display_formatter.py`: 25 tests, 97% coverage
 - `test_config_manager.py`: 20 tests, 94% coverage
+- `test_fields.py`: 93% coverage
 - `test_statusline.py`: 38 tests, 90% coverage
 - `test_integration.py`: 2 integration tests
   - Full statusline output verification

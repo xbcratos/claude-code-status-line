@@ -9,6 +9,8 @@ from unittest.mock import Mock, patch, mock_open
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from git_utils import get_git_branch, get_git_status, _is_git_dirty, _get_ahead_behind, get_pr_status
+from colors import colorize
+import constants
 
 
 class TestGetGitBranch:
@@ -276,7 +278,8 @@ class TestGetGitStatus:
 
         with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
             result = get_git_status(str(tmp_path))
-            assert result == "✓"
+            expected = colorize("✓", constants.COLOR_GREEN)
+            assert result == expected
 
     def test_dirty_repository(self, tmp_path):
         """Test shows star for dirty repository."""
@@ -293,7 +296,8 @@ class TestGetGitStatus:
 
         with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
             result = get_git_status(str(tmp_path))
-            assert result == "★"
+            expected = colorize("★", constants.COLOR_YELLOW)
+            assert result == expected
 
     def test_ahead_of_remote(self, tmp_path):
         """Test shows ahead indicator."""
@@ -310,7 +314,8 @@ class TestGetGitStatus:
 
         with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
             result = get_git_status(str(tmp_path))
-            assert result == "✓ ↑2"
+            expected = f"{colorize('✓', constants.COLOR_GREEN)} {colorize('↑2', constants.COLOR_CYAN)}"
+            assert result == expected
 
     def test_behind_remote(self, tmp_path):
         """Test shows behind indicator."""
@@ -327,7 +332,8 @@ class TestGetGitStatus:
 
         with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
             result = get_git_status(str(tmp_path))
-            assert result == "✓ ↓3"
+            expected = f"{colorize('✓', constants.COLOR_GREEN)} {colorize('↓3', constants.COLOR_MAGENTA)}"
+            assert result == expected
 
     def test_dirty_ahead_and_behind(self, tmp_path):
         """Test shows all indicators when dirty, ahead, and behind."""
@@ -344,7 +350,8 @@ class TestGetGitStatus:
 
         with patch('subprocess.run', side_effect=[mock_rev_parse, mock_status, mock_rev_list]):
             result = get_git_status(str(tmp_path))
-            assert result == "★ ↓2 ↑1"
+            expected = f"{colorize('★', constants.COLOR_YELLOW)} {colorize('↓2', constants.COLOR_MAGENTA)} {colorize('↑1', constants.COLOR_CYAN)}"
+            assert result == expected
 
     def test_not_in_git_repository(self, tmp_path):
         """Test returns empty string when not in git repository."""
